@@ -30,6 +30,13 @@ namespace battlepong_game.Utilities
             var angle = Math.Tan(y / x);
             return angle;
         }
-
+        public static double DegreeToRadian(double angle)
+        {
+            return Math.PI * angle / 180.0;
+        }
+        public static double RadianToDegree(double angle)
+        {
+            return Math.PI / angle * 180.0;
+        }
     }
 }

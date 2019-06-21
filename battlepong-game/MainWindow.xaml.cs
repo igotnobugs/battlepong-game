@@ -21,6 +21,7 @@ namespace battlepong_game
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -79,24 +80,24 @@ namespace battlepong_game
         private Mesh player1Paddle = new Mesh()
         {
             Position = new Vector3(-50, 0, commonZ),
-            Scale = new Vector3(1, 5, 1),
+            Scale = new Vector3(1.0f, 5, 1),
             Mass = 0.5f,
-            Color = new Vector3(200, 0, 0)
+            Color = new Vector3(1.0f, 0.0f, 0.0f)
         };
 
         private Mesh player2Paddle = new Mesh()
         {
             Position = new Vector3(50, 0, commonZ),
-            Scale = new Vector3(1, 5, 1),
+            Scale = new Vector3(1.0f, 5, 1),
             Mass = 0.5f,
-            Color = new Vector3(0, 0, 200)
+            Color = new Vector3(0.0f, 0.0f, 1.0f)
         };
 
         private Mesh ball = new Mesh()
         {
             Position = new Vector3(0, 0, commonZ),
-            Radius = 1,
-            Color = new Vector3(200, 200, 200)
+            Scale = new Vector3(1, 1, 1),
+            Color = new Vector3(1.0f, 1.0f, 1.0f)
         };
 
         #endregion
@@ -106,17 +107,25 @@ namespace battlepong_game
         {
             Position = new Vector3(0, 30, commonZ),
             Scale = new Vector3(60, 0.5f, 1),
-            Color = new Vector3(200, 200, 200)
+            Color = new Vector3(1.0f, 1.0f, 1.0f)
         };
         private Mesh LowerBoundary = new Mesh()
         {
             Position = new Vector3(0, -30, commonZ),
             Scale = new Vector3(60, 0.5f, 1),
-            Color = new Vector3(200, 200, 200)
+            Color = new Vector3(1.0f, 1.0f, 1.0f)
+        };
+        private Mesh Player1Line = new Mesh()
+        {
+            Color = new Vector3(0.5f, 0, 0)
+        };
+        private Mesh Player2Line = new Mesh()
+        {
+            Color = new Vector3(0, 0, 0.5f)
         };
         private Mesh CenterLine = new Mesh()
         {
-            Color = new Vector3(100, 100, 100)
+            Color = new Vector3(0.5f, 0.5f, 0.5f)
         };
 
         #endregion
@@ -140,8 +149,8 @@ namespace battlepong_game
         private int resetCounter = 30;
         private int player1Score = 0;
         private int player2Score = 0;
-        private float ballSpeedModifier = 0.0f;
         private float time = 0;
+        private float scoringArea = 10.0f;
 
         //AI CODE
         private bool isPlayer2AI = true;
@@ -162,11 +171,13 @@ namespace battlepong_game
             UpperBoundary.DrawCube(gl);
             LowerBoundary.DrawCube(gl);
             CenterLine.DrawDottedLine(gl, new Vector3(0, LowerBoundary.Position.y, commonZ), new Vector3(0, UpperBoundary.Position.y, commonZ));
+            Player1Line.DrawDottedLine(gl, new Vector3(player1Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player1Paddle.Position.x, UpperBoundary.Position.y, commonZ));
+            Player2Line.DrawDottedLine(gl, new Vector3(player2Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player2Paddle.Position.x, UpperBoundary.Position.y, commonZ));
 
             player1Paddle.DrawCube(gl);
             player2Paddle.DrawCube(gl);
 
-            ball.DrawCircle(gl);
+            ball.DrawCube(gl);
 
             //Start
             if (!playBall)
@@ -175,25 +186,22 @@ namespace battlepong_game
                 ball.ApplyForce(new Vector3(2, 0, 0));
                 playBall = true;
                 alreadyScored = false;
-                ballSpeedModifier = 0.0f;
                 resetCounter = 30;
             }
             else
             {
                 time++;
-                //Speed up every 30 frames
-                if ((time % 30) == 0)
+                //Speed up every 120 frames but stop when velocity is 3.
+
+                if (((time % 120) == 0) && (ball.Velocity.GetLength() < 3))
                 {
-                    ballSpeedModifier = ballSpeedModifier + 0.01f;
-                    if (ball.Velocity.x < 0)
-                    {
-                        ball.Velocity.x -= ballSpeedModifier;
-                    }
-                    else
-                    {
-                        ball.Velocity.x += ballSpeedModifier;
-                    }
+                    ball.IncreaseSpeed(0.1f);
                 }
+            }
+
+            if (resetCounter <= 0)
+            {
+                playBall = false;
             }
 
             #region Controls
@@ -241,12 +249,16 @@ namespace battlepong_game
             }
             #endregion
 
+            #region Scoring
             //Reached behind player 1
-            if ((ball.Position.x < player1Paddle.Position.x - 5.0f) &&
+            if ((ball.Position.x < player1Paddle.Position.x - scoringArea) &&
                 (resetCounter > 0))
             {
+                //Stop the ball
                 ball.Velocity *= 0;
+                //Start reset counter
                 resetCounter--;
+                //Score once
                 if (!alreadyScored)
                 {
                     player2Score++;
@@ -255,7 +267,7 @@ namespace battlepong_game
 
             }
             //Reached behind player 2
-            if ((ball.Position.x > player2Paddle.Position.x + 5.0f) &&
+            if ((ball.Position.x > player2Paddle.Position.x + scoringArea) &&
                 (resetCounter > 0))
             {
                 ball.Velocity *= 0;
@@ -266,66 +278,67 @@ namespace battlepong_game
                     alreadyScored = true;
                 }
             }
+            #endregion
+
+            #region Text
             gl.DrawText(((int)Width / 2) - 40, 35, 1.0f, 0, 0, "Calibri", 30, "" + player1Score);
             gl.DrawText((int)Width / 2 - 10, 35, 0, 1.0f, 0, "Calibri", 30, ":");
             gl.DrawText((int)Width / 2 + 20, 35, 0, 0, 1.0f, "Calibri", 30, "" + player2Score);
-            gl.DrawText(10, 20, 1.0f, 0, 0, "Calibri", 10, "" + ball.Velocity.x);
+            gl.DrawText(10, 20, 1.0f, 0, 0, "Calibri", 10, "" + ball.Velocity.GetLength());
+            gl.DrawText(10, 30, 1.0f, 0, 0, "Calibri", 10, "" + resetCounter);
+            #endregion
 
-            if (resetCounter <= 0)
-            {
-                playBall = false;
-            }
-
-
-            if (ball.Position.y > UpperBoundary.Position.y - (UpperBoundary.Scale.y * 4))
+            #region Collision
+            if (ball.Position.y + ball.Scale.x > UpperBoundary.Position.y - (UpperBoundary.Scale.y * 4))
             {
                 ball.Velocity.y = -ball.Velocity.y;
             }
 
-            if (ball.Position.y < LowerBoundary.Position.y + (LowerBoundary.Scale.y * 4))
+            if (ball.Position.y - ball.Scale.x < LowerBoundary.Position.y + (LowerBoundary.Scale.y * 4))
             {
                 ball.Velocity.y = -ball.Velocity.y;
             }
 
             //Collision for Player 1 Paddle
-            if ((ball.Position.x - ball.Radius <= player1Paddle.Position.x + player1Paddle.Scale.x) &&
-                (ball.Position.y + ball.Radius >= player1Paddle.Position.y - player1Paddle.Scale.y) &&
-                (ball.Position.y - ball.Radius <= player1Paddle.Position.y + player1Paddle.Scale.y))
+            if ((ball.Position.x - ball.Scale.x <= player1Paddle.Position.x + player1Paddle.Scale.x) &&
+                (ball.Position.y + ball.Scale.x >= player1Paddle.Position.y - player1Paddle.Scale.y) &&
+                (ball.Position.y - ball.Scale.x <= player1Paddle.Position.y + player1Paddle.Scale.y) &&
+                //Prevent ball from colliding behind the paddle
+                (ball.Position.x > player1Paddle.Position.x))
             {
                 System.Media.SoundPlayer player = new System.Media.SoundPlayer(@"Sound\Power.wav");
                 player.Play();
 
                 if (ball.Position.y > player1Paddle.Position.y)
                 {
-                    ball.Velocity.y = 1;
+                    ball.ChangeAngle(50);
                 }
                 else
                 {
-                    ball.Velocity.y = -1;
+                    ball.ChangeAngle(310);
                 }
-
-                ball.Velocity.x = -ball.Velocity.x;
             }
 
             //Collision for Player 2 Paddle
-            if ((ball.Position.x + ball.Radius >= player2Paddle.Position.x - player2Paddle.Scale.x) &&
-                (ball.Position.y + ball.Radius >= player2Paddle.Position.y - player2Paddle.Scale.y) &&
-                (ball.Position.y - ball.Radius <= player2Paddle.Position.y + player2Paddle.Scale.y))
+            if ((ball.Position.x + ball.Scale.x >= player2Paddle.Position.x - player2Paddle.Scale.x) &&
+                (ball.Position.y + ball.Scale.x >= player2Paddle.Position.y - player2Paddle.Scale.y) &&
+                (ball.Position.y - ball.Scale.x <= player2Paddle.Position.y + player2Paddle.Scale.y) &&
+                //Prevent ball from colliding behind the paddle
+                (ball.Position.x < player2Paddle.Position.x))
             {
                 System.Media.SoundPlayer player = new System.Media.SoundPlayer(@"Sound\Power.wav");
                 player.Play();
 
                 if (ball.Position.y > player2Paddle.Position.y)
                 {
-                    ball.Velocity.y = 1;
+                    ball.ChangeAngle(130);
                 }
                 else
                 {
-                    ball.Velocity.y = -1;
+                    ball.ChangeAngle(230);
                 }
-
-                ball.Velocity.x = -ball.Velocity.x;
             }
+            #endregion
         }
     }
 }

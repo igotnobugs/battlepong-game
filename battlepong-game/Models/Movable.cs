@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using battlepong_game.Utilities;
 
 namespace battlepong_game.Models
 {
@@ -37,6 +38,22 @@ namespace battlepong_game.Models
             Friction.Normalize();
             Friction *= frictionMagnitude;
             this.ApplyForce(Friction);
+        }
+
+        public void ChangeAngle(float angle)
+        {
+            var speed = this.Velocity.GetLength();
+            this.Velocity.x = speed * (float)Math.Cos(GameUtils.DegreeToRadian(angle));
+            this.Velocity.y = speed * (float)Math.Sin(GameUtils.DegreeToRadian(angle));
+        }
+
+        public void IncreaseSpeed(float speed)
+        {
+            var curSpeed = this.Velocity.GetLength();         
+            var curAngle = Math.Atan2(this.Velocity.y, this.Velocity.x);
+
+            this.Velocity.x = (curSpeed + speed) * (float)Math.Cos(curAngle);
+            this.Velocity.y = (curSpeed + speed) * (float)Math.Sin(curAngle);
         }
     }
 }
