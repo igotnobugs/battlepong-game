@@ -81,7 +81,7 @@ namespace battlepong_game
         {
             Position = new Vector3(-50, 0, commonZ),
             Scale = new Vector3(1.0f, 5, 1),
-            Mass = 0.5f,
+            Mass = 1.0f,
             Color = new Vector3(1.0f, 0.0f, 0.0f)
         };
 
@@ -89,7 +89,7 @@ namespace battlepong_game
         {
             Position = new Vector3(50, 0, commonZ),
             Scale = new Vector3(1.0f, 5, 1),
-            Mass = 0.5f,
+            Mass = 1.0f,
             Color = new Vector3(0.0f, 0.0f, 1.0f)
         };
 
@@ -138,11 +138,14 @@ namespace battlepong_game
         public Key player1Down = Key.S;
         public Key player2Up = Key.Up;
         public Key player2Down = Key.Down;
+        public Key quitKey = Key.Escape;
 
         //Stats
-        public float player1Speed = 4.0f;
-        public float player2Speed = 4.0f;
-
+        public float player1MaxSpeed = 4.0f;
+        public Vector3 player1Accel = new Vector3(0, 1.0f, 0);
+        public float player2MaxSpeed = 4.0f;
+        public Vector3 player2Accel = new Vector3(0, 1.0f, 0);
+ 
         //Game States
         private bool playBall = false;
         private bool alreadyScored = false;
@@ -184,6 +187,8 @@ namespace battlepong_game
             {
                 ball.Position = new Vector3(0, 0, commonZ);
                 ball.ApplyForce(new Vector3(2, 0, 0));
+                player1Paddle.Position.y *= 0;
+                player2Paddle.Position.y *= 0;
                 playBall = true;
                 alreadyScored = false;
                 resetCounter = 30;
@@ -205,28 +210,48 @@ namespace battlepong_game
             }
 
             #region Controls
+
+            if (Keyboard.IsKeyDown(quitKey))
+            {
+                Environment.Exit(0);
+            }
+
+            if ((!Keyboard.IsKeyDown(player1Up)) || (!Keyboard.IsKeyDown(player1Down)))
+            {
+                player1Paddle.Velocity *= 0;
+            }
             if ((Keyboard.IsKeyDown(player1Up)) &&
                 (player1Paddle.Position.y + player1Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y * 4)))
             {
-                player1Paddle.Position.y += player1Speed;
-            }
+                if (player1Paddle.Velocity.y < 4.0f)
+                {
+                    player1Paddle.ApplyForce(player1Accel);
+                }
+            } 
             if ((Keyboard.IsKeyDown(player1Down)) &&
                 (player1Paddle.Position.y - player1Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y * 4)))
             {
-                player1Paddle.Position.y -= player1Speed;
-            }
+                //player1Paddle.Position.y -= player1Speed;
+                if (player1Paddle.Velocity.y > -4.0f)
+                {
+                    player1Paddle.ApplyForce(player1Accel * -1);
+                }
+            } 
             //Check if AI is enabled
             if (!isPlayer2AI)
             {
                 if ((Keyboard.IsKeyDown(player2Up)) &&
                     (player2Paddle.Position.y + player2Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y * 4)))
                 {
-                    player2Paddle.Position.y += player2Speed;
+                    //player2Paddle.Position.y += player2Speed;
+                    player2Paddle.ApplyForce(player2Accel);
                 }
                 if ((Keyboard.IsKeyDown(player2Down)) &&
                     (player2Paddle.Position.y - player2Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y * 4)))
                 {
-                    player2Paddle.Position.y -= player2Speed;
+                    //player2Paddle.Position.y -= player2Speed;
+                    player2Paddle.ApplyForce(player2Accel * -1);
+
                 }
             }
             else
@@ -237,16 +262,30 @@ namespace battlepong_game
                     (ball.Position.x > player2Paddle.Position.x - visionDistance) &&
                     (player2Paddle.Position.y + player2Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y * 4)))
                 {
-                    player2Paddle.Position.y += player2Speed;
+                    //player2Paddle.Position.y += player2Speed;
+                    if (player2Paddle.Velocity.y < 4.0f)
+                    {
+                        player2Paddle.Velocity *= 0;
+                        player2Paddle.ApplyForce(player2Accel);
+                    }
                 }
                 //Below paddle
                 if ((ball.Position.y < player2Paddle.Position.y) &&
                     (ball.Position.x < player2Paddle.Position.x + visionDistance) &&
                     (player2Paddle.Position.y - player2Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y * 4)))
                 {
-                    player2Paddle.Position.y -= player2Speed;
+                    //player2Paddle.Position.y -= player2Speed;
+                    if (player2Paddle.Velocity.y > -4.0f)
+                    {
+                        player2Paddle.Velocity *= 0;
+                        player2Paddle.ApplyForce(player2Accel * -1);
+                    }
                 }
             }
+
+
+
+
             #endregion
 
             #region Scoring
@@ -286,15 +325,19 @@ namespace battlepong_game
             gl.DrawText((int)Width / 2 + 20, 35, 0, 0, 1.0f, "Calibri", 30, "" + player2Score);
             gl.DrawText(10, 20, 1.0f, 0, 0, "Calibri", 10, "" + ball.Velocity.GetLength());
             gl.DrawText(10, 30, 1.0f, 0, 0, "Calibri", 10, "" + resetCounter);
+            //Debug
+            gl.DrawText(10, 50, 1.0f, 1.0f, 0, "Calibri", 20, "Ball Vector Direction:" + ball.Velocity.x + ", " + ball.Velocity.y);
+
+            //gl.DrawText(10, 60, 1.0f, 1.0f, 0, "Calibri", 20, "Ball Vector Direction Normalized:" + ballVelocityNormalized.x + ", " + ballVelocityNormalized.y);
             #endregion
 
             #region Collision
-            if (ball.Position.y + ball.Scale.x > UpperBoundary.Position.y - (UpperBoundary.Scale.y * 4))
+            if (ball.Position.y + ball.Scale.x >= UpperBoundary.Position.y - (UpperBoundary.Scale.y * 4))
             {
                 ball.Velocity.y = -ball.Velocity.y;
             }
 
-            if (ball.Position.y - ball.Scale.x < LowerBoundary.Position.y + (LowerBoundary.Scale.y * 4))
+            if (ball.Position.y - ball.Scale.x <= LowerBoundary.Position.y + (LowerBoundary.Scale.y * 4))
             {
                 ball.Velocity.y = -ball.Velocity.y;
             }

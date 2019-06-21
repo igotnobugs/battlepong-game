@@ -19,9 +19,7 @@ namespace battlepong_game.Models
 
         public void ApplyForce(Vector3 force)
         {
-            // F = MA
-            // A = F/M
-            this.Acceleration += (force / Mass); //force accumulation
+            this.Acceleration += (force / Mass);
         }
 
         public void ApplyGravity(float scalar = 0.1f)
