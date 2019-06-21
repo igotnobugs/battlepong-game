@@ -1,6 +1,6 @@
 # battlepong-game
 
-Pong game in OpenGL
+Pong game in OpenGL  
 Game is supposed to have powerups and abilities.
 
 ## Controls
