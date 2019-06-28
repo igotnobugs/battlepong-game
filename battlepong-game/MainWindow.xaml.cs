@@ -39,7 +39,7 @@ namespace battlepong_game
             var position = e.GetPosition(this);
             mousePos.x = (float)position.X - (float)Width / 2.0f;
             mousePos.y = -((float)position.Y - (float)Height / 2.0f);
-            //Console.WriteLine((mousePos.x)+ " " + (mousePos.y));
+            //Console.WriteLine((mousePos.x) + " " + (mousePos.y));
         }
 
         private void OpenGLControl_OpenGLInitialized(object sender, SharpGL.SceneGraph.OpenGLEventArgs args)
@@ -76,11 +76,11 @@ namespace battlepong_game
         }
         public static float commonZ = 50.0f;
 
-        #region Movable
+        #region Movable Meshes
         private Mesh player1Paddle = new Mesh()
         {
             Position = new Vector3(-50, 0, commonZ),
-            Scale = new Vector3(1.0f, 5, 1),
+            Scale = new Vector3(1.0f, 6, 1),
             Mass = 1.0f,
             Color = new Vector3(1.0f, 0.0f, 0.0f)
         };
@@ -88,7 +88,7 @@ namespace battlepong_game
         private Mesh player2Paddle = new Mesh()
         {
             Position = new Vector3(50, 0, commonZ),
-            Scale = new Vector3(1.0f, 5, 1),
+            Scale = new Vector3(1.0f, 6, 1),
             Mass = 1.0f,
             Color = new Vector3(0.0f, 0.0f, 1.0f)
         };
@@ -99,10 +99,9 @@ namespace battlepong_game
             Scale = new Vector3(1, 1, 1),
             Color = new Vector3(1.0f, 1.0f, 1.0f)
         };
-
         #endregion
 
-        #region Static
+        #region Static Meshes
         private Mesh UpperBoundary = new Mesh()
         {
             Position = new Vector3(0, 30, commonZ),
@@ -130,6 +129,7 @@ namespace battlepong_game
 
         #endregion
 
+        #region Variables
         public Vector3 mouseVector = new Vector3();
         public Vector3 mousePos = new Vector3();
 
@@ -138,7 +138,16 @@ namespace battlepong_game
         public Key player1Down = Key.S;
         public Key player2Up = Key.Up;
         public Key player2Down = Key.Down;
-        public Key quitKey = Key.Escape;
+        public Key player1quitKey = Key.Escape;
+        public Key player2Quit = Key.End;
+
+        //GameSettings
+        //private float maxHorizontalBorder = 50.0f;
+        private float maxVerticalBorder = 30.0f;
+        //private double angleRandom = 10.0f;
+        private bool isSoundEnabled = false;
+        System.Media.SoundPlayer paddleHitSound = new System.Media.SoundPlayer(@"Sound\Power.wav");
+
 
         //Stats
         public float player1MaxSpeed = 4.0f;
@@ -154,10 +163,13 @@ namespace battlepong_game
         private int player2Score = 0;
         private float time = 0;
         private float scoringArea = 10.0f;
+        private bool player1Scored = false;
+        private List<Mesh> ballTrails = new List<Mesh>();
 
         //AI CODE
         private bool isPlayer2AI = true;
         private int visionDistance = 55;
+        #endregion
 
         private void OpenGLControl_OpenGLDraw(object sender, SharpGL.SceneGraph.OpenGLEventArgs args)
         {
@@ -185,8 +197,16 @@ namespace battlepong_game
             //Start
             if (!playBall)
             {
+                ball.Color = new Vector3(1.0f, 1.0f, 1.0f);
                 ball.Position = new Vector3(0, 0, commonZ);
-                ball.ApplyForce(new Vector3(2, 0, 0));
+                if (player1Scored)
+                {
+                    //if Player 1 scored Ball to player2
+                    ball.ApplyForce(new Vector3(1.4f, 1.4f, 0));
+                } else
+                {
+                    ball.ApplyForce(new Vector3(-1.4f, 1.4f, 0));
+                }
                 player1Paddle.Position.y *= 0;
                 player2Paddle.Position.y *= 0;
                 playBall = true;
@@ -195,35 +215,71 @@ namespace battlepong_game
             }
             else
             {
-                time++;
-                //Speed up every 120 frames but stop when velocity is 3.
-
+                time++; 
+                //Speed up every 120 frames but stop when velocity of ball is 3.
                 if (((time % 120) == 0) && (ball.Velocity.GetLength() < 3))
                 {
                     ball.IncreaseSpeed(0.1f);
-                }
+                } 
             }
 
+            //Draw ball trails
+            if (playBall)
+            {
+                Mesh ballTrail = new Mesh()
+                {
+                    Position = ball.Position - ball.Velocity,
+                    Scale = new Vector3(0.8f, 0.8f, 0),
+                    //Color = new Vector3(0.8f, 0.8f, 0.8f)
+                };
+                ballTrails.Add(ballTrail);
+                foreach (var trail in ballTrails)
+                {
+
+                    trail.Color = ball.Color - new Vector3(0.2f, 0.2f, 0.2f);
+                    trail.DrawCube(gl);
+
+                    //Reduce size
+                    if (trail.Scale.x > 0)
+                    {
+                        trail.Scale.x = trail.Scale.x - 0.06f;
+                        trail.Scale.y = trail.Scale.y - 0.06f;
+                    } else
+                    {
+                        trail.Scale.x = 0.8f;
+                        trail.Scale.y = 0.8f;
+                    }
+
+                    //Use it back again
+                    if (trail.Scale.x < 0)
+                    {
+                        trail.Position = ball.Position;
+                    }
+                }
+            }
             if (resetCounter <= 0)
             {
                 playBall = false;
             }
 
             #region Controls
-
-            if (Keyboard.IsKeyDown(quitKey))
+            //Quit Game
+            if (Keyboard.IsKeyDown(player2Quit))
             {
                 Environment.Exit(0);
             }
 
+            //Smooth out paddle movement, will come up a good fix later
             if ((!Keyboard.IsKeyDown(player1Up)) || (!Keyboard.IsKeyDown(player1Down)))
             {
                 player1Paddle.Velocity *= 0;
             }
+
+            //Player 1 Controls maxVerticalBorder
             if ((Keyboard.IsKeyDown(player1Up)) &&
                 (player1Paddle.Position.y + player1Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y * 4)))
             {
-                if (player1Paddle.Velocity.y < 4.0f)
+                if (player1Paddle.Velocity.y < player1MaxSpeed)
                 {
                     player1Paddle.ApplyForce(player1Accel);
                 }
@@ -231,25 +287,29 @@ namespace battlepong_game
             if ((Keyboard.IsKeyDown(player1Down)) &&
                 (player1Paddle.Position.y - player1Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y * 4)))
             {
-                //player1Paddle.Position.y -= player1Speed;
-                if (player1Paddle.Velocity.y > -4.0f)
+                if (player1Paddle.Velocity.y > -player1MaxSpeed)
                 {
                     player1Paddle.ApplyForce(player1Accel * -1);
                 }
-            } 
-            //Check if AI is enabled
+            }
+
+            //Smooth out paddle movement, will come up a good fix later
+            if ((!Keyboard.IsKeyDown(player2Up)) || (!Keyboard.IsKeyDown(player2Down)))
+            {
+                player2Paddle.Velocity *= 0;
+            }
+
+            //Check if AI is not enabled, if so allow Player 2 controls
             if (!isPlayer2AI)
             {
                 if ((Keyboard.IsKeyDown(player2Up)) &&
                     (player2Paddle.Position.y + player2Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y * 4)))
                 {
-                    //player2Paddle.Position.y += player2Speed;
                     player2Paddle.ApplyForce(player2Accel);
                 }
                 if ((Keyboard.IsKeyDown(player2Down)) &&
                     (player2Paddle.Position.y - player2Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y * 4)))
                 {
-                    //player2Paddle.Position.y -= player2Speed;
                     player2Paddle.ApplyForce(player2Accel * -1);
 
                 }
@@ -262,8 +322,7 @@ namespace battlepong_game
                     (ball.Position.x > player2Paddle.Position.x - visionDistance) &&
                     (player2Paddle.Position.y + player2Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y * 4)))
                 {
-                    //player2Paddle.Position.y += player2Speed;
-                    if (player2Paddle.Velocity.y < 4.0f)
+                    if (player2Paddle.Velocity.y < player2MaxSpeed)
                     {
                         player2Paddle.Velocity *= 0;
                         player2Paddle.ApplyForce(player2Accel);
@@ -274,18 +333,13 @@ namespace battlepong_game
                     (ball.Position.x < player2Paddle.Position.x + visionDistance) &&
                     (player2Paddle.Position.y - player2Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y * 4)))
                 {
-                    //player2Paddle.Position.y -= player2Speed;
-                    if (player2Paddle.Velocity.y > -4.0f)
+                    if (player2Paddle.Velocity.y > -player2MaxSpeed)
                     {
                         player2Paddle.Velocity *= 0;
                         player2Paddle.ApplyForce(player2Accel * -1);
                     }
                 }
             }
-
-
-
-
             #endregion
 
             #region Scoring
@@ -302,6 +356,7 @@ namespace battlepong_game
                 {
                     player2Score++;
                     alreadyScored = true;
+                    player1Scored = false;
                 }
 
             }
@@ -315,31 +370,33 @@ namespace battlepong_game
                 {
                     player1Score++;
                     alreadyScored = true;
+                    player1Scored = true;
                 }
             }
             #endregion
 
             #region Text
-            gl.DrawText(((int)Width / 2) - 40, 35, 1.0f, 0, 0, "Calibri", 30, "" + player1Score);
-            gl.DrawText((int)Width / 2 - 10, 35, 0, 1.0f, 0, "Calibri", 30, ":");
-            gl.DrawText((int)Width / 2 + 20, 35, 0, 0, 1.0f, "Calibri", 30, "" + player2Score);
-            gl.DrawText(10, 20, 1.0f, 0, 0, "Calibri", 10, "" + ball.Velocity.GetLength());
-            gl.DrawText(10, 30, 1.0f, 0, 0, "Calibri", 10, "" + resetCounter);
+            gl.DrawText((int)Width / 2 - 60, (int)Height / 2 + 160, 1.0f, 0.5f, 0.5f, "Calibri", 60, "" + player1Score);
+            gl.DrawText((int)Width / 2 + 10, (int)Height / 2 + 160, 0.5f, 0.5f, 1.0f, "Calibri", 60, "" + player2Score);
+            gl.DrawText(10, 20, 1.0f, 0, 0, "Calibri", 10, "Speed: " + ball.Velocity.GetLength());
+            gl.DrawText(10, 30, 1.0f, 0, 0, "Calibri", 10, "Reset in: " + resetCounter);
             //Debug
             gl.DrawText(10, 50, 1.0f, 1.0f, 0, "Calibri", 20, "Ball Vector Direction:" + ball.Velocity.x + ", " + ball.Velocity.y);
-
-            //gl.DrawText(10, 60, 1.0f, 1.0f, 0, "Calibri", 20, "Ball Vector Direction Normalized:" + ballVelocityNormalized.x + ", " + ballVelocityNormalized.y);
+            gl.DrawText(10, 70, 1.0f, 1.0f, 0, "Calibri", 10, "Ball Position: " + ball.Position.x + ", " + ball.Position.y);
             #endregion
 
             #region Collision
-            if (ball.Position.y + ball.Scale.x >= UpperBoundary.Position.y - (UpperBoundary.Scale.y * 4))
-            {
+            //Ball reached top
+            if (ball.Position.y + ball.Scale.x > maxVerticalBorder)
+            {          
                 ball.Velocity.y = -ball.Velocity.y;
+                ball.Position.y = ball.Position.y - 1.0f;
             }
-
-            if (ball.Position.y - ball.Scale.x <= LowerBoundary.Position.y + (LowerBoundary.Scale.y * 4))
+            //Ball reached bottom
+            if (ball.Position.y - ball.Scale.x < maxVerticalBorder * -1)
             {
                 ball.Velocity.y = -ball.Velocity.y;
+                ball.Position.y = ball.Position.y + 1.0f;
             }
 
             //Collision for Player 1 Paddle
@@ -349,17 +406,26 @@ namespace battlepong_game
                 //Prevent ball from colliding behind the paddle
                 (ball.Position.x > player1Paddle.Position.x))
             {
-                System.Media.SoundPlayer player = new System.Media.SoundPlayer(@"Sound\Power.wav");
-                player.Play();
-
-                if (ball.Position.y > player1Paddle.Position.y)
+                if (isSoundEnabled)
                 {
-                    ball.ChangeAngle(50);
+                    paddleHitSound.Play();
                 }
-                else
+                //Allowable angle is (0 - 89) && (269 - 360)
+                //Ball hitting the exact center is reflected back straight
+                if (ball.Position.y == player1Paddle.Position.y)
                 {
-                    ball.ChangeAngle(310);
+                    ball.ChangeAngle(0);
+                }              
+                else if (ball.Position.y > player1Paddle.Position.y)
+                {
+                    //Max Deviation from center to eachtip is 60 degrees
+                    ball.ChangeAngle(10 * (ball.Position.y - player1Paddle.Position.y));
+                } else
+                {
+                    ball.ChangeAngle(360 + (10 * (ball.Position.y - player1Paddle.Position.y)));
                 }
+                ball.Color = player1Paddle.Color + new Vector3(0.2f, 0.2f, 0.2f);
+                Console.WriteLine("Ball hit paddle 1 " + (ball.Position.y - player1Paddle.Position.y) + " from center");
             }
 
             //Collision for Player 2 Paddle
@@ -369,17 +435,27 @@ namespace battlepong_game
                 //Prevent ball from colliding behind the paddle
                 (ball.Position.x < player2Paddle.Position.x))
             {
-                System.Media.SoundPlayer player = new System.Media.SoundPlayer(@"Sound\Power.wav");
-                player.Play();
-
-                if (ball.Position.y > player2Paddle.Position.y)
+                if (isSoundEnabled)
                 {
-                    ball.ChangeAngle(130);
+                    paddleHitSound.Play();
+                }
+
+                //Allowable angle is (91 - 269)
+                if (ball.Position.y == player2Paddle.Position.y)
+                {
+                    ball.ChangeAngle(180);
+                }
+                else if (ball.Position.y > player2Paddle.Position.y)
+                {
+                    ball.ChangeAngle(180 - (10 * (ball.Position.y - player2Paddle.Position.y)));
                 }
                 else
                 {
-                    ball.ChangeAngle(230);
+                    ball.ChangeAngle(180 - (10 * (ball.Position.y - player2Paddle.Position.y)));
                 }
+
+                ball.Color = player2Paddle.Color + new Vector3(0.2f, 0.2f, 0.2f);
+                Console.WriteLine("Ball hit paddle 2 " + (ball.Position.y - player2Paddle.Position.y) + " from center");
             }
             #endregion
         }
