@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace battlepong_game.Models
 {
@@ -12,8 +8,8 @@ namespace battlepong_game.Models
         public static Vector3 Down = new Vector3(0, -1, 0);
         public static Vector3 Left = new Vector3(-1, 0, 0);
         public static Vector3 Right = new Vector3(1, 0, 0);
+        public float x, y, z, a; //vector coordinates
 
-        public float x, y, z; //vector coordinates
         public Vector3() // default constructor, 0,0,0
         {
             x = 0; y = 0; z = 0;

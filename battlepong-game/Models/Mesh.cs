@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SharpGL;
 using battlepong_game.Utilities;
 
@@ -10,8 +6,9 @@ namespace battlepong_game.Models
 {
     public class Mesh : Movable
     {
+        public bool enabledUpdate = true;
         public Vector3 Scale = new Vector3(0.5f, 0.5f, 0.5f);
-        public Vector3 Color = new Vector3(50, 50, 50);
+        public Vector4 Color = new Vector4(0.5f, 0.5f, 0.5f, 0.5f);
         public float Radius = 0.5f;
         public string Type = "Cube";
 
@@ -40,6 +37,22 @@ namespace battlepong_game.Models
             this.Position.y = y;
             this.Position.z = z;
             this.Rotation = r;
+        }
+
+        public void DrawSquare(OpenGL gl)
+        {
+            gl.Color(Color.x, Color.y, Color.z, Color.a);
+            gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
+            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
+            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z);
+            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z);
+            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);   
+            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
+            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z);
+            gl.End();
+
+            UpdateMotion();
+
         }
 
         public void DrawCube(OpenGL gl)
@@ -125,7 +138,10 @@ namespace battlepong_game.Models
             gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z - this.Scale.z);
             gl.End();
 
-            UpdateMotion();
+            if (enabledUpdate)
+            {
+                UpdateMotion();
+            }
         }
 
         public void DrawCircle(OpenGL gl, int Resolution = 50)
@@ -217,8 +233,6 @@ namespace battlepong_game.Models
             }
             gl.End();
             gl.PopMatrix();
-
-
 
             //Draw Right Curve
             gl.Color(0.7, 0.5, 0);

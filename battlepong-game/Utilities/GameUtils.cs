@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using battlepong_game.Models;
 
 namespace battlepong_game.Utilities
 {
-    public class GameUtils : Mesh
+    public class GameUtils
     {
         public static float Constrain(float val, float min, float max)
         {
@@ -15,6 +12,7 @@ namespace battlepong_game.Utilities
             else if (val >= max) return max;
             else return val;
         }
+
         public static float GetDistanceBetween(Mesh firstObject, Mesh secondObject)
         {
             var x = secondObject.Position.x - firstObject.Position.x;
@@ -30,13 +28,23 @@ namespace battlepong_game.Utilities
             var angle = Math.Tan(y / x);
             return angle;
         }
+
         public static double DegreeToRadian(double angle)
         {
             return Math.PI * angle / 180.0;
         }
+
         public static double RadianToDegree(double angle)
         {
             return Math.PI / angle * 180.0;
+        }
+
+        public static long NanoTime()
+        {
+            long nano = 10000L * Stopwatch.GetTimestamp();
+            nano /= TimeSpan.TicksPerMillisecond;
+            nano *= 100L;
+            return nano;
         }
     }
 }
