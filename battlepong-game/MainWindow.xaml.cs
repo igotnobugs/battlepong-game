@@ -84,14 +84,12 @@ namespace battlepong_game {
             Mass = 1.0f,
             Color = new Vector4(1.0f, 0.0f, 0.0f)
         };
-
         private Mesh player2Paddle = new Mesh() {
             Position = new Vector3(50, 0, commonZ),
             Scale = new Vector3(1.0f, 6, 1),
             Mass = 1.0f,
             Color = new Vector4(0.0f, 0.0f, 1.0f)
         };
-
         private Mesh ball = new Mesh() {
             Position = new Vector3(0, 0, commonZ),
             Scale = new Vector3(1, 1, 1),
@@ -177,6 +175,7 @@ namespace battlepong_game {
         private bool isOptionMenuOpen = false;
         private bool isTestToggled = false;
         private bool isResetOngoing = false;
+        private bool isRestarting = false;
         private float angleRandom;
         private int resetCounter = 30;
         private int player1Score = 0;
@@ -194,11 +193,10 @@ namespace battlepong_game {
 
         //String Variables
         private float cons = 0.375f; //Monospace Constant to be able to get the length of string
-        private string[] menuText = {"C# BATTLE PONG", "Enter to Start", "Right Shift to toggle Player 2", "Player 2 Enabled", "Player 2 Disabled" };
+        private string[] menuText = {"C# PONG", "Enter to Start", "Hold Right Shift to toggle Player 2", "Player 2 Enabled", "Player 2 Disabled" };
         private float[] menuSize = { 50.0f, 30.0f, 20.0f, 15.0f, 15.0f };
-        private string[] optionText = { "Options", "Test1", "Test2", "Test3", "Test4", "Test5", "Test6" };
+        private string[] optionText = { "Options", "Max Ball Speed", "Test2", "Test3", "Test4", "Test5", "Restart Game" };
         private float[] optionSize = { 40.0f, 20.0f, 20.0f, 20.0f, 20.0f, 20.0f, 20.0f };
-
         //FPS
         private long lastFrame = GameUtils.NanoTime();
         public float FPS = 0;
@@ -208,7 +206,7 @@ namespace battlepong_game {
         #endregion
 
         private void OpenGLControl_OpenGLDraw(object sender, SharpGL.SceneGraph.OpenGLEventArgs args) {
-            Title = "C# Battle Pong";
+            Title = menuText[0];
 
             OpenGL gl = args.OpenGL;
             gl.Viewport(0, 0, (int)Width, (int)Height);
@@ -315,6 +313,13 @@ namespace battlepong_game {
             }
             #endregion
 
+            #region Restart Code
+            if (isRestarting) {
+
+            }
+
+            #endregion
+
             #region Controls, Movement and AI
             //Before Game starts controls
             if (!isGameStarted) {
@@ -325,7 +330,7 @@ namespace battlepong_game {
                 }
 
                 //Toggle Player 2
-                if (Keyboard.IsKeyToggled(player2Enable)) {
+                if (Keyboard.IsKeyDown(player2Enable)) {
                     isPlayer2AI = false;
                 }
                 else {
@@ -584,6 +589,7 @@ namespace battlepong_game {
             }
             #endregion
         }
+        //End
 
         public void LogFrame() {
             long time = (GameUtils.NanoTime() - lastFrame);
