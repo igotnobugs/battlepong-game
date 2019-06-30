@@ -2,34 +2,31 @@
 using SharpGL;
 using battlepong_game.Utilities;
 
-namespace battlepong_game.Models
-{
-    public class Mesh : Movable
-    {
+namespace battlepong_game.Models {
+
+    public class Mesh : Movable {
+
         public bool enabledUpdate = true;
         public Vector3 Scale = new Vector3(0.5f, 0.5f, 0.5f);
         public Vector4 Color = new Vector4(0.5f, 0.5f, 0.5f, 0.5f);
         public float Radius = 0.5f;
         public string Type = "Cube";
 
-        public Mesh()
-        {
+        public Mesh() {
             this.Position = new Vector3();
             this.Velocity = new Vector3();
             this.Acceleration = new Vector3();
             this.Rotation = 0;
         }
 
-        public Mesh(Vector3 initPos)
-        {
+        public Mesh(Vector3 initPos) {
             this.Position = initPos;
             this.Velocity = new Vector3();
             this.Acceleration = new Vector3();
             this.Rotation = 0;
         }
 
-        public Mesh(float x, float y, float z, int r)
-        {
+        public Mesh(float x, float y, float z, int r) {
             this.Position = new Vector3();
             this.Velocity = new Vector3();
             this.Acceleration = new Vector3();
@@ -39,8 +36,7 @@ namespace battlepong_game.Models
             this.Rotation = r;
         }
 
-        public void DrawSquare(OpenGL gl)
-        {
+        public void DrawSquare(OpenGL gl) {
             gl.Color(Color.x, Color.y, Color.z, Color.a);
             gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
             gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
@@ -52,53 +48,9 @@ namespace battlepong_game.Models
             gl.End();
 
             UpdateMotion();
-
         }
 
-        public void DrawCube(OpenGL gl)
-        {
-            /*
-            //Line
-            gl.LineWidth(2);
-            gl.Color(0, 0, 0);
-            gl.Begin(OpenGL.GL_LINE_LOOP);
-            //Front face
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z + this.Scale.z);
-
-            //Right face
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z - this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z - this.Scale.z);
-
-            //Back face
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z - this.Scale.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z - this.Scale.z);
-            //Left face
-
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z + this.Scale.z);
-
-            gl.End();
-
-            gl.Begin(OpenGL.GL_LINE_LOOP);
-            //Top face      
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z - this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z - this.Scale.z);
-            gl.End();
-
-            gl.Begin(OpenGL.GL_LINE_LOOP);
-            //Bottom face
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z - this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z - this.Scale.z);
-            gl.End();
-            */
-
+        public void DrawCube(OpenGL gl) {
             //POLYGON
             gl.Color(Color.x, Color.y, Color.z);
             gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
@@ -138,22 +90,19 @@ namespace battlepong_game.Models
             gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z - this.Scale.z);
             gl.End();
 
-            if (enabledUpdate)
-            {
+            if (enabledUpdate) {
                 UpdateMotion();
             }
         }
 
-        public void DrawCircle(OpenGL gl, int Resolution = 50)
-        {
+        public void DrawCircle(OpenGL gl, int Resolution = 50) {
 
             gl.LineWidth(2);
             this.Type = "Circle";
             gl.Color(Color.x, Color.y, Color.z);
             Resolution = (int)GameUtils.Constrain(Resolution, 10, 100);
             gl.Begin(OpenGL.GL_LINE_LOOP);
-            for (int ii = 0; ii < Resolution; ii++)
-            {
+            for (int ii = 0; ii < Resolution; ii++) {
                 double angle = 2.0f * Math.PI * ii / Resolution;
                 double x = Radius * Math.Cos(angle);
                 double y = Radius * Math.Sin(angle);
@@ -163,8 +112,7 @@ namespace battlepong_game.Models
             UpdateMotion();
         }
 
-        public void DrawLine(OpenGL gl, Mesh origin, Vector3 target, float MultScale = 1.0f)
-        {
+        public void DrawLine(OpenGL gl, Mesh origin, Vector3 target, float MultScale = 1.0f) {
             gl.Color(Color.x, Color.y, Color.z);
             gl.Begin(OpenGL.GL_LINE_STRIP);
             gl.Vertex(origin.Position.x, origin.Position.y, origin.Position.z);
@@ -174,8 +122,7 @@ namespace battlepong_game.Models
             UpdateMotion();
         }
 
-        public void DrawDottedLine(OpenGL gl, Vector3 origin, Vector3 target, float space = 0, float MultScale = 1.0f)
-        {
+        public void DrawDottedLine(OpenGL gl, Vector3 origin, Vector3 target, float space = 0, float MultScale = 1.0f) {
             gl.Color(Color.x, Color.y, Color.z);
             gl.Begin(OpenGL.GL_LINE_STRIP);
             gl.Vertex(origin.x, origin.y, origin.z);
@@ -188,13 +135,10 @@ namespace battlepong_game.Models
             this.Type = "Circle";
             gl.Color(Color.x, Color.y, Color.z);
             Resolution = (int)GameUtils.Constrain(Resolution, 10, 100);
-
-            
-
+         
             //Main Circle
             gl.Begin(OpenGL.GL_LINE_LOOP);
-            for (int ii = 0; ii < Resolution; ii++)
-            {
+            for (int ii = 0; ii < Resolution; ii++) {
                 double angle = 2.0f * Math.PI * ii / Resolution;
                 double x = Radius * Math.Cos(angle);
                 double y = Radius * Math.Sin(angle);
@@ -207,8 +151,7 @@ namespace battlepong_game.Models
             gl.Translate(this.Position.x, this.Position.y, this.Position.z);
             gl.Rotate(0, 0, this.Rotation);
             gl.Begin(OpenGL.GL_LINE_LOOP);
-            for (int ii = 0; ii < Resolution; ii++)
-            {
+            for (int ii = 0; ii < Resolution; ii++) {
                 double angle = 2.0f * Math.PI * ii / Resolution;
                 double x = Radius * Math.Sin(angle);
                 double z = Radius * Math.Cos(angle);
@@ -223,8 +166,7 @@ namespace battlepong_game.Models
             gl.Translate(this.Position.x, this.Position.y, this.Position.z);
             gl.Rotate(0, 0, this.Rotation - 90);
             gl.Begin(OpenGL.GL_LINE_LOOP);
-            for (int ii = 0; ii < Resolution; ii++)
-            {
+            for (int ii = 0; ii < Resolution; ii++) {
                 double angle = 2.0f * Math.PI * ii / Resolution;
                 double x = Radius * Math.Sin(angle);
                 double z = Radius * Math.Cos(angle);
@@ -237,8 +179,7 @@ namespace battlepong_game.Models
             //Draw Right Curve
             gl.Color(0.7, 0.5, 0);
             gl.Begin(OpenGL.GL_POLYGON);
-            for (int ii = 0; ii < Resolution; ii++)
-            {
+            for (int ii = 0; ii < Resolution; ii++) {
                 double angle = 2.0f * Math.PI * ii / Resolution;
                 double x = Radius * Math.Cos(angle);
                 double y = Radius * Math.Sin(angle);
@@ -247,16 +188,12 @@ namespace battlepong_game.Models
             gl.End();
 
             UpdateMotion();
-
         }
 
-        private void UpdateMotion()
-        {
+        private void UpdateMotion() {
             this.Velocity += this.Acceleration;
             this.Position += this.Velocity;
             this.Acceleration *= 0;
-        }
-
-        
+        }      
     }
 }

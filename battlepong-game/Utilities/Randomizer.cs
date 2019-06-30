@@ -1,16 +1,14 @@
 ﻿using System;
 
-namespace battlepong_game.Utilities
-{
-    public static class Randomizer
-    {
-        public static double Generate(double min, double max)
-        {
+namespace battlepong_game.Utilities {
+
+    public static class Randomizer {
+
+        public static double Generate(double min, double max) {
             return new Random().NextDouble() * (max - min) + min;
         }
 
-        public static double Gaussian(double mean = 0, double stdDev = 1)
-        {
+        public static double Gaussian(double mean = 0, double stdDev = 1) {
             Random r = new Random();
 
             var u1 = r.NextDouble();
