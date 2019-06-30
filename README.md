@@ -9,7 +9,7 @@ Game is supposed to have powerups and abilities.
 **Up Key** - Player 2 Move Up  
 **Down Key** - Player 2 Move Up  
 
-##Packages  
+## Packages  
 SharpGL
 NAudio
 
