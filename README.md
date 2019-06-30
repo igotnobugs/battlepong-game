@@ -10,7 +10,7 @@ Game is supposed to have powerups and abilities.
 **Down Key** - Player 2 Move Up  
 
 ## Packages  
-SharpGL
+SharpGL  
 NAudio
 
 ## Credits  
