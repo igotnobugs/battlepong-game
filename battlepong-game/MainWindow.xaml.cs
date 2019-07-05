@@ -1,14 +1,12 @@
-﻿using System;
+﻿using battlepong_game.Models;
+using battlepong_game.Utilities;
+using NAudio.Wave;
+using SharpGL;
+using System;
 using System.Collections.Generic;
+using System.Media;
 using System.Windows;
 using System.Windows.Input;
-using System.Media;
-using System.Diagnostics;
-using battlepong_game.Models;
-using battlepong_game.Utilities;
-using SharpGL;
-using NAudio;
-using NAudio.Wave;
 
 namespace battlepong_game {
 
@@ -184,6 +182,7 @@ namespace battlepong_game {
         private float scoringArea = 10.0f;
         private bool didPlayer1Scored = false;
         private List<Mesh> ballTrails = new List<Mesh>();
+        private List<Mesh> ballExplosions = new List<Mesh>();
 
         //AI CODE
         private bool isPlayer2AI = true;
@@ -228,7 +227,7 @@ namespace battlepong_game {
 
             ball.DrawCube(gl);
 
-
+            //Start main music
             if (!isStartMusPlayed) {
                 waveOutDevice.Init(odysseyMus);
                 waveOutDevice.Play();
@@ -240,8 +239,8 @@ namespace battlepong_game {
                 //waveOutDevice.Dispose();
             }
 
-            #region Main
             //Start 
+            #region Main
             if (isGameStarted && !isOptionMenuOpen) {
                 if (!isBallPlayed) {
                     ball.Color = new Vector4(1.0f, 1.0f, 1.0f);
@@ -281,21 +280,36 @@ namespace battlepong_game {
                 ballTrails.Add(ballTrail);
                 foreach (var trail in ballTrails) {
                     trail.Color = ball.Color - new Vector4(0.2f, 0.2f, 0.2f);
-                    trail.DrawCube(gl);
+
                     //Reduce size
-                    if (trail.Scale.x > 0)  {
+                    if (trail.Scale.x > 0) {
+                        trail.DrawCube(gl);
                         if (!isOptionMenuOpen) {
-                            trail.Scale.x = trail.Scale.x - 0.06f;
-                            trail.Scale.y = trail.Scale.y - 0.06f;
+                            trail.Scale = trail.Scale - 0.06f;
                         }
                     }
-                    else {
-                        trail.Scale.x = 0.8f;
-                        trail.Scale.y = 0.8f;
-                    }
-                    //Use it back again
-                    if (trail.Scale.x < 0) {
-                        trail.Position = ball.Position;
+                }
+
+                //A shockwave when ball hit the boundaries
+                Mesh ballExplosion = new Mesh() {
+                    Position = ball.Position - ball.Velocity,
+                    Radius = 1.0f,
+                    Color = new Vector4(0.8f, 0.8f, 0.8f)
+                };
+                if ((ball.Position.y + ball.Scale.x > maxVerticalBorder - UpperBoundary.Scale.y) ||
+                    (ball.Position.y - ball.Scale.x < maxVerticalBorder * -1 + UpperBoundary.Scale.y)){
+                    ballExplosions.Add(ballExplosion);
+                }
+
+                foreach (var explosions in ballExplosions) {
+                   
+                    //Reduce size and opacity
+                    if (explosions.Radius < 6.0f) {
+                        explosions.DrawCircle(gl);
+                        if (!isOptionMenuOpen) {
+                            explosions.Radius += (6.0f - explosions.Radius) / 2 ;
+                            explosions.Color.a -= 0.2f;
+                        }
                     }
                 }
             }
@@ -304,12 +318,11 @@ namespace battlepong_game {
             #region Reset Code
             if (isResetOngoing) {
                 resetCounter--;
-            }
-
-            if (resetCounter <= 0) {
-                ball.Velocity *= 0;
-                isBallPlayed = false;
-                isResetOngoing = false;
+                if (resetCounter <= 0) {
+                    ball.Velocity *= 0;
+                    isBallPlayed = false;
+                    isResetOngoing = false;
+                }
             }
             #endregion
 
@@ -317,7 +330,6 @@ namespace battlepong_game {
             if (isRestarting) {
 
             }
-
             #endregion
 
             #region Controls, Movement and AI
@@ -373,6 +385,8 @@ namespace battlepong_game {
                 !isOptionMenuOpen && isGameStarted) {
                 if (player1Paddle.Velocity.y < player1MaxSpeed) {
                     player1Paddle.ApplyForce(player1Accel);
+                } else {
+                    player1Paddle.Velocity.y = player1MaxSpeed;
                 }
             } 
             else if (Keyboard.IsKeyDown(playerOneDown) &&
@@ -380,6 +394,8 @@ namespace battlepong_game {
                 !isOptionMenuOpen && isGameStarted) {
                 if (player1Paddle.Velocity.y > -player1MaxSpeed) {
                     player1Paddle.ApplyForce(player1Accel * -1);
+                } else {
+                    player1Paddle.Velocity.y = -player1MaxSpeed;
                 }
             }
             else {
@@ -390,13 +406,23 @@ namespace battlepong_game {
             if (!isPlayer2AI) {
                 if (Keyboard.IsKeyDown(playerTwoUp) &&
                     (player2Paddle.Position.y + player2Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y)) &&
-                    !isOptionMenuOpen && isGameStarted && !Keyboard.IsKeyDown(playerTwoDown)) {
-                    player2Paddle.ApplyForce(player2Accel);
+                    !isOptionMenuOpen && isGameStarted) {
+                    if (player2Paddle.Velocity.y < player2MaxSpeed) {
+                        player2Paddle.ApplyForce(player2Accel);
+                    }
+                    else {
+                        player2Paddle.Velocity.y = player2MaxSpeed;
+                    }                  
                 }
                 else if (Keyboard.IsKeyDown(playerTwoDown) &&
                     (player2Paddle.Position.y - player2Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y)) &&
-                    !isOptionMenuOpen && isGameStarted && !Keyboard.IsKeyDown(playerTwoUp)) {
-                    player2Paddle.ApplyForce(player2Accel * -1);
+                    !isOptionMenuOpen && isGameStarted) {              
+                    if (player2Paddle.Velocity.y < player2MaxSpeed) {
+                        player2Paddle.ApplyForce(player2Accel * -1);
+                    }
+                    else {
+                        player2Paddle.Velocity.y = -player2MaxSpeed;
+                    }
                 }
                 else {
                     player2Paddle.Velocity *= 0;
@@ -411,6 +437,8 @@ namespace battlepong_game {
                     !isOptionMenuOpen) {
                     if (player2Paddle.Velocity.y < player2MaxSpeed) {
                         player2Paddle.ApplyForce(player2Accel);
+                    } else {
+                        player2Paddle.Velocity.y = player2MaxSpeed;
                     }
                 }
                 //Below paddle
@@ -420,6 +448,8 @@ namespace battlepong_game {
                     !isOptionMenuOpen) {
                     if (player2Paddle.Velocity.y > -player2MaxSpeed) {
                         player2Paddle.ApplyForce(player2Accel * -1);
+                    } else {
+                        player2Paddle.Velocity.y = -player2MaxSpeed;
                     }
                 }
                 else{
@@ -465,6 +495,60 @@ namespace battlepong_game {
                     isScoredAlready = true;
                     didPlayer1Scored = true;
                 }
+            }
+            #endregion
+
+            #region Text and Menus
+            //Game Screen
+            gl.DrawText((int)Width / 2 - 65, (int)Height / 2 - 340, 1.0f, 0.3f, 0.3f, "Courier", 60, "" + player1Score);
+            gl.DrawText((int)Width / 2, (int)Height / 2 - 340, 0.3f, 0.3f, 1.0f, "Courier", 60, "" + player2Score);
+            gl.DrawText(50, (int)Height / 2 + 230, 1.0f, 0.3f, 0.3f, "Courier", 20, "Player 1");
+
+            if (isPlayer2AI) {
+                gl.DrawText((int)Width - 100, (int)Height / 2 + 230, 0.3f, 0.3f, 1.0f, "Courier", 20, "AI");
+            }
+            else {
+                gl.DrawText((int)Width - 200, (int)Height / 2 + 230, 0.3f, 0.3f, 1.0f, "Courier", 20, "Player 2");
+            }
+
+            //Start Screen
+            if (!isGameStarted) {
+                gl.LoadIdentity();
+                gl.Translate(0.0f, .0f, -150.0f);
+                StartMenu.DrawSquare(gl);
+                gl.DrawText((int)Width / 2 - ((int)(menuSize[0] * cons) * menuText[0].Length), (int)Height / 2 + 60, 0.5f, 1.0f, 0.5f, "Courier New", menuSize[0], menuText[0]);
+                gl.DrawText((int)Width / 2 - ((int)(menuSize[1] * cons) * menuText[1].Length), (int)Height / 2 - 30, 1.0f, 1.0f, 1.0f, "Courier New", menuSize[1], menuText[1]);
+                gl.DrawText((int)Width / 2 - ((int)(menuSize[2] * cons) * menuText[2].Length), (int)Height / 2 - 140, 1.0f, 1.0f, 1.0f, "Courier New", menuSize[2], menuText[2]);
+                if (!isPlayer2AI) {
+                    //Player 2 Enabled
+                    gl.DrawText((int)Width / 2 - ((int)(menuSize[3] * cons) * menuText[3].Length), (int)Height / 2 - 160, 0.3f, 0.3f, 1.0f, "Courier New", menuSize[3], menuText[3]);
+                }
+                else {
+                    gl.DrawText((int)Width / 2 - ((int)(menuSize[4] * cons) * menuText[4].Length), (int)Height / 2 - 160, 1.0f, 0.3f, 0.3f, "Courier New", menuSize[4], menuText[4]);
+                }
+            }
+
+            //Option Menu
+            if (isOptionMenuOpen) {
+                gl.LoadIdentity();
+                gl.Translate(0.0f, .0f, -150.0f);
+                OptionMenu.DrawSquare(gl);
+                gl.DrawText((int)Width / 2 - ((int)(optionSize[0] * cons) * optionText[0].Length), (int)Height / 2 + 90, 1.0f, 1.0f, 1.0f, "Courier New", optionSize[0], optionText[0]);
+
+                for (int i = 1; i < optionText.GetLength(0); i++) {
+                    gl.DrawText((int)Width / 2 - 200, (int)Height / 2 + 30 - (30 * i), 1.0f, 1.0f, 1.0f, "Courier New", optionSize[i], "" + optionText[i]);
+                }
+            }
+
+            //Debug
+            if (isTestToggled) {
+                LogFrame();
+                gl.DrawText(10, (int)Height - 90, 1.0f, 0.0f, 0, "Calibri", 10, "FPS: " + Math.Truncate(FPS) + " | Low: " + Math.Truncate(lowFPS) + " | High: " + Math.Truncate(highFPS) + " | Avg: " + Math.Truncate(avgFPS));
+                gl.DrawText(10, 50, 1.0f, 1.0f, 0, "Calibri", 10, "Angle Randomizer: " + angleRandom);
+                gl.DrawText(10, 40, 1.0f, 1.0f, 0, "Calibri", 10, "Ball Position: " + ball.Position.x + ", " + ball.Position.y);
+                gl.DrawText(10, 30, 1.0f, 1.0f, 0, "Calibri", 10, "Ball Vector Direction: " + ball.Velocity.x + ", " + ball.Velocity.y);
+                gl.DrawText(10, 20, 1.0f, 0.0f, 0, "Calibri", 10, "Reset in: " + resetCounter);
+                gl.DrawText(10, 10, 1.0f, 0.0f, 0, "Calibri", 10, "Speed: " + ball.Velocity.GetLength());
             }
             #endregion
 
@@ -549,61 +633,7 @@ namespace battlepong_game {
                 //Console.WriteLine("Ball hit paddle 2 " + (ball.Position.y - player2Paddle.Position.y) + " from center");
             }
             #endregion
-
-            #region Text and Menus
-            //Game Screen
-            gl.DrawText((int)Width / 2 - 65, (int)Height / 2 - 340, 1.0f, 0.3f, 0.3f, "Courier", 60, "" + player1Score);
-            gl.DrawText((int)Width / 2, (int)Height / 2 - 340, 0.3f, 0.3f, 1.0f, "Courier", 60, "" + player2Score);
-            gl.DrawText(50, (int)Height / 2 + 230, 1.0f, 0.3f, 0.3f, "Courier", 20, "Player 1");
-
-            if (isPlayer2AI) {
-                gl.DrawText((int)Width - 100, (int)Height / 2 + 230, 0.3f, 0.3f, 1.0f, "Courier", 20, "AI");
-            }
-            else {
-                gl.DrawText((int)Width - 200, (int)Height / 2 + 230, 0.3f, 0.3f, 1.0f, "Courier", 20, "Player 2");
-            }
-
-            //Start Screen
-            if (!isGameStarted) {
-                gl.LoadIdentity();
-                gl.Translate(0.0f, .0f, -150.0f);
-                StartMenu.DrawSquare(gl);
-                gl.DrawText((int)Width / 2 - ((int)(menuSize[0] * cons) * menuText[0].Length), (int)Height / 2 + 60, 0.5f, 1.0f, 0.5f, "Courier New", menuSize[0], menuText[0]);
-                gl.DrawText((int)Width / 2 - ((int)(menuSize[1] * cons) * menuText[1].Length), (int)Height / 2 - 30, 1.0f, 1.0f, 1.0f, "Courier New", menuSize[1], menuText[1]);
-                gl.DrawText((int)Width / 2 - ((int)(menuSize[2] * cons) * menuText[2].Length), (int)Height / 2 - 140, 1.0f, 1.0f, 1.0f, "Courier New", menuSize[2], menuText[2]);
-                if (!isPlayer2AI) {
-                    //Player 2 Enabled
-                    gl.DrawText((int)Width / 2 - ((int)(menuSize[3] * cons) * menuText[3].Length), (int)Height / 2 - 160, 0.3f, 0.3f, 1.0f, "Courier New", menuSize[3], menuText[3]);
-                }
-                else {
-                    gl.DrawText((int)Width / 2 - ((int)(menuSize[4] * cons) * menuText[4].Length), (int)Height / 2 - 160, 1.0f, 0.3f, 0.3f, "Courier New", menuSize[4], menuText[4]);
-                }
-            }
-
-            //Option Menu
-            if (isOptionMenuOpen)
-            {
-                gl.LoadIdentity();
-                gl.Translate(0.0f, .0f, -150.0f);
-                OptionMenu.DrawSquare(gl);
-                gl.DrawText((int)Width / 2 - ((int)(optionSize[0] * cons) * optionText[0].Length), (int)Height / 2 + 90, 1.0f, 1.0f, 1.0f, "Courier New", optionSize[0], optionText[0]);
-
-                for (int i = 1; i < optionText.GetLength(0); i++) {
-                    gl.DrawText((int)Width / 2 - 200, (int)Height / 2 + 30 - (30 * i), 1.0f, 1.0f, 1.0f, "Courier New", optionSize[i], "" + optionText[i]);
-                }
-            }
-
-            //Debug
-            if (isTestToggled) {
-                LogFrame();
-                gl.DrawText(10, (int)Height - 90, 1.0f, 0.0f, 0, "Calibri", 10, "FPS: " + Math.Truncate(FPS) + " | Low: " + Math.Truncate(lowFPS) + " | High: " + Math.Truncate(highFPS) + " | Avg: " + Math.Truncate(avgFPS));
-                gl.DrawText(10, 50, 1.0f, 1.0f, 0, "Calibri", 10, "Angle Randomizer: " + angleRandom);
-                gl.DrawText(10, 40, 1.0f, 1.0f, 0, "Calibri", 10, "Ball Position: " + ball.Position.x + ", " + ball.Position.y);
-                gl.DrawText(10, 30, 1.0f, 1.0f, 0, "Calibri", 10, "Ball Vector Direction: " + ball.Velocity.x + ", " + ball.Velocity.y);
-                gl.DrawText(10, 20, 1.0f, 0.0f, 0, "Calibri", 10, "Reset in: " + resetCounter);
-                gl.DrawText(10, 10, 1.0f, 0.0f, 0, "Calibri", 10, "Speed: " + ball.Velocity.GetLength());
-            }
-            #endregion
+    
         }
         //End
 

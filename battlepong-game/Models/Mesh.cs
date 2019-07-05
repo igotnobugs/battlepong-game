@@ -99,7 +99,7 @@ namespace battlepong_game.Models {
 
             gl.LineWidth(2);
             this.Type = "Circle";
-            gl.Color(Color.x, Color.y, Color.z);
+            gl.Color(Color.x, Color.y, Color.z, Color.a);
             Resolution = (int)GameUtils.Constrain(Resolution, 10, 100);
             gl.Begin(OpenGL.GL_LINE_LOOP);
             for (int ii = 0; ii < Resolution; ii++) {

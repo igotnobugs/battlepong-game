@@ -21,6 +21,7 @@ namespace battlepong_game.Models {
             this.z = z;
         }
 
+        //Vector to Vector Operations
         public static Vector3 operator +(Vector3 left, Vector3 right) {
             return new Vector3(left.x + right.x,
                 left.y + right.y,
@@ -31,6 +32,13 @@ namespace battlepong_game.Models {
             return new Vector3(left.x - right.x,
                 left.y - right.y,
                 left.z - right.z);
+        }
+
+        //Vector to single operations
+        public static Vector3 operator -(Vector3 left, float minus) {
+            return new Vector3(left.x - minus,
+                left.y - minus,
+                left.z - minus);
         }
 
         public static Vector3 operator *(Vector3 left, float scalar) {
