@@ -50,6 +50,18 @@ namespace battlepong_game.Models {
             UpdateMotion();
         }
 
+        public void DrawTriangle(OpenGL gl) {
+            gl.Color(Color.x, Color.y, Color.z, Color.a);
+            gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
+            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
+            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
+            gl.Vertex(this.Position.x, this.Position.y + this.Scale.y, this.Position.z);
+
+            gl.End();
+
+
+        }
+
         public void DrawCube(OpenGL gl) {
             //POLYGON
             gl.Color(Color.x, Color.y, Color.z);
