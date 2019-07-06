@@ -47,7 +47,9 @@ namespace battlepong_game.Models {
             gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z);
             gl.End();
 
-            UpdateMotion();
+            if (enabledUpdate) {
+                UpdateMotion();
+            }
         }
 
         public void DrawTriangle(OpenGL gl) {
