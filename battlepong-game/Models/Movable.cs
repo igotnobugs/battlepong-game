@@ -41,6 +41,7 @@ namespace battlepong_game.Models {
             var curSpeed = this.Velocity.GetLength();         
             var curAngle = Math.Atan2(this.Velocity.y, this.Velocity.x);
 
+            //Velocity = Velocity * (1 + speed);
             this.Velocity.x = (curSpeed + speed) * (float)Math.Cos(curAngle);
             this.Velocity.y = (curSpeed + speed) * (float)Math.Sin(curAngle);
         }

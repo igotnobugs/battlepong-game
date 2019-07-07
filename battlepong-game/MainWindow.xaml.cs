@@ -148,6 +148,7 @@ namespace battlepong_game {
         public Key pauseKey = Key.P; //opens option menu
         public Key testKey = Key.T;
         public Key startKey = Key.Enter;
+        public Key player1Enable = Key.LeftShift;
         public Key player2Enable = Key.RightShift;
 
         //Stats
@@ -194,7 +195,7 @@ namespace battlepong_game {
         public bool isPlayer2AI = true;
         public bool willReturnToCenter = true;
         //private bool willPredictTrajectory = false;
-        public int visionDistance = 55;
+        public int visionDistance = 50;
 
         //String Variables
         public float cons = 0.375f; //Monospace Constant to be able to get the length of string
@@ -355,11 +356,14 @@ namespace battlepong_game {
 
                 //Toggle Player 2
                 //If Key is down make it false else true;
+
+                isPlayer1AI = (Keyboard.IsKeyDown(player1Enable)) ? true : false;
                 isPlayer2AI = (Keyboard.IsKeyDown(player2Enable)) ? false : true;
 
             }
             else {
                 //Option Menu
+                /*
                 if (Keyboard.IsKeyToggled(pauseKey)) {
                     isOptionMenuOpen = true;
                     ball.enabledUpdate = false;
@@ -372,6 +376,11 @@ namespace battlepong_game {
                         waveOutDevice.Volume = 1.0f;
                     }
                 }
+                */
+                isOptionMenuOpen = Keyboard.IsKeyToggled(pauseKey) ? true : false;
+                ball.enabledUpdate = Keyboard.IsKeyToggled(pauseKey) ? false : true;
+                //player2Paddle.enabledUpdate = Keyboard.IsKeyToggled(pauseKey) ? false : true;
+                waveOutDevice.Volume = Keyboard.IsKeyToggled(pauseKey) ? 0.5f : 1.0f;
             }
 
             //Quit Game
@@ -384,10 +393,9 @@ namespace battlepong_game {
             isTestToggled = (Keyboard.IsKeyToggled(testKey)) ? true : false;
 
             //Player 1 Controls
-            if (!isPlayer1AI) {
+            if (!isPlayer1AI && !isOptionMenuOpen && isGameStarted) {
                 if (Keyboard.IsKeyDown(playerOneUp) &&
-                    (player1Paddle.Position.y + player1Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y)) &&
-                    !isOptionMenuOpen && isGameStarted) {
+                    (player1Paddle.Position.y + player1Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y))) {
 
                     if (player1Paddle.Velocity.y < player1MaxSpeed) {
                         player1Paddle.ApplyForce(player1Accel);
@@ -397,8 +405,7 @@ namespace battlepong_game {
                     }
                 }
                 else if (Keyboard.IsKeyDown(playerOneDown) &&
-                    (player1Paddle.Position.y - player1Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y)) &&
-                    !isOptionMenuOpen && isGameStarted) {
+                    (player1Paddle.Position.y - player1Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y))) {
                     if (player1Paddle.Velocity.y > -player1MaxSpeed) {
                         player1Paddle.ApplyForce(player1Accel * -1);
                     }
@@ -412,51 +419,53 @@ namespace battlepong_game {
             }
             else {
                 //AI Code
-                //Above paddle
-                if ((ball.Position.y > player1Paddle.Position.y) &&
-                    (ball.Position.x < player1Paddle.Position.x + visionDistance) &&
+                //If ball is within Vision distance
+                if (ball.Position.x < player1Paddle.Position.x + visionDistance) {
+                    //Above paddle
+                    if ((ball.Position.y > player1Paddle.Position.y) &&
                     (player1Paddle.Position.y + player1Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y)) &&
                     !isOptionMenuOpen) {
-                    if (player1Paddle.Velocity.y < player1MaxSpeed) {
-                        player1Paddle.ApplyForce(player1Accel);
+                        if (player1Paddle.Velocity.y < player1MaxSpeed) {
+                            player1Paddle.ApplyForce(player1Accel);
+                        }
+                        else {
+                            player1Paddle.Velocity.y = player1MaxSpeed;
+                        }
+                    }
+                    //Below paddle
+                    else if ((ball.Position.y < player1Paddle.Position.y) &&
+                        (player1Paddle.Position.y - player1Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y)) &&
+                        !isOptionMenuOpen) {
+                        if (player1Paddle.Velocity.y > -player1MaxSpeed) {
+                            player1Paddle.ApplyForce(player1Accel * -1);
+                        }
+                        else {
+                            player1Paddle.Velocity.y = -player1MaxSpeed;
+                        }
                     }
                     else {
-                        player1Paddle.Velocity.y = player1MaxSpeed;
-                    }
-                }
-                //Below paddle
-                else if ((ball.Position.y < player1Paddle.Position.y) &&
-                    (ball.Position.x < player1Paddle.Position.x + visionDistance) &&
-                    (player1Paddle.Position.y - player1Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y)) &&
-                    !isOptionMenuOpen) {
-                    if (player1Paddle.Velocity.y > -player1MaxSpeed) {
-                        player1Paddle.ApplyForce(player1Accel * -1);
-                    }
-                    else {
-                        player1Paddle.Velocity.y = -player1MaxSpeed;
+                        player1Paddle.Velocity *= 0;
                     }
                 }
                 else {
-                    player1Paddle.Velocity *= 0;
-                }
-
-                //AI will return Paddle to center if enabled
-                if (willReturnToCenter && (ball.Position.x < player2Paddle.Position.x - visionDistance)) {
-                    if (player2Paddle.Position.y == 0) {
-                        player2Paddle.Velocity *= 0;
-                    }
-                    else if (player2Paddle.Position.y > 0) {
-                        player2Paddle.ApplyForce(player2Accel * -1);
-                    }
-                    else {
-                        player2Paddle.ApplyForce(player2Accel);
+                    //AI will return Paddle to center if enabled
+                    if (willReturnToCenter) {
+                        if ((player1Paddle.Position.y > -2) && (player1Paddle.Position.y < 2)) {
+                            player1Paddle.Velocity *= 0;
+                        }
+                        else if (player1Paddle.Position.y > 0) {
+                            player1Paddle.ApplyForce(player1Accel * -1);
+                        }
+                        else {
+                            player1Paddle.ApplyForce(player1Accel);
+                        }
                     }
                 }
             }
 
 
             //Check if AI is not enabled, if so allow Player 2 controls
-            if (!isPlayer2AI) {
+            if (!isPlayer2AI){
                 if (Keyboard.IsKeyDown(playerTwoUp) &&
                     (player2Paddle.Position.y + player2Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y)) &&
                     !isOptionMenuOpen && isGameStarted) {
@@ -483,42 +492,46 @@ namespace battlepong_game {
             }
             else {
                 //AI Code
-                //Above paddle
-                if ((ball.Position.y > player2Paddle.Position.y) &&
-                    (ball.Position.x > player2Paddle.Position.x - visionDistance) &&
+                //If ball is within Vision distance
+                if (ball.Position.x > player2Paddle.Position.x - visionDistance) {
+                    //Above paddle
+                    if ((ball.Position.y > player2Paddle.Position.y) &&
                     (player2Paddle.Position.y + player2Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y)) &&
                     !isOptionMenuOpen) {
-                    if (player2Paddle.Velocity.y < player2MaxSpeed) {
-                        player2Paddle.ApplyForce(player2Accel);
-                    } else {
-                        player2Paddle.Velocity.y = player2MaxSpeed;
+                        if (player2Paddle.Velocity.y < player2MaxSpeed) {
+                            player2Paddle.ApplyForce(player2Accel);
+                        }
+                        else {
+                            player2Paddle.Velocity.y = player2MaxSpeed;
+                        }
                     }
-                }
-                //Below paddle
-                else if ((ball.Position.y < player2Paddle.Position.y) &&
-                    (ball.Position.x > player2Paddle.Position.x - visionDistance) &&
-                    (player2Paddle.Position.y - player2Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y)) &&
-                    !isOptionMenuOpen) {
-                    if (player2Paddle.Velocity.y > -player2MaxSpeed) {
-                        player2Paddle.ApplyForce(player2Accel * -1);
-                    } else {
-                        player2Paddle.Velocity.y = -player2MaxSpeed;
-                    }
-                }
-                else{
-                    player2Paddle.Velocity *= 0;
-                }
-
-                //AI will return Paddle to center if enabled
-                if (willReturnToCenter && (ball.Position.x < player2Paddle.Position.x - visionDistance)) {
-                    if (player2Paddle.Position.y == 0) {
-                        player2Paddle.Velocity *= 0;
-                    }
-                    else if (player2Paddle.Position.y > 0) {
-                        player2Paddle.ApplyForce(player2Accel * -1);
+                    //Below paddle
+                    else if ((ball.Position.y < player2Paddle.Position.y) &&
+                        (player2Paddle.Position.y - player2Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y)) &&
+                        !isOptionMenuOpen) {
+                        if (player2Paddle.Velocity.y > -player2MaxSpeed) {
+                            player2Paddle.ApplyForce(player2Accel * -1);
+                        }
+                        else {
+                            player2Paddle.Velocity.y = -player2MaxSpeed;
+                        }
                     }
                     else {
-                        player2Paddle.ApplyForce(player2Accel);
+                        player2Paddle.Velocity *= 0;
+                    }
+                }
+                else {
+                    //AI will return Paddle to center if enabled
+                    if (willReturnToCenter) {
+                        if ((player2Paddle.Position.y > -2) && (player2Paddle.Position.y <  2)) {
+                            player2Paddle.Velocity *= 0;
+                        }
+                        else if (player2Paddle.Position.y > 0) {
+                            player2Paddle.ApplyForce(player2Accel * -1/2);
+                        }
+                        else {
+                            player2Paddle.ApplyForce(player2Accel/2);
+                        }
                     }
                 }
             }
@@ -555,7 +568,14 @@ namespace battlepong_game {
             //Game Screen
             gl.DrawText((int)Width / 2 - 65, (int)Height / 2 - 340, 1.0f, 0.3f, 0.3f, "Courier", 60, "" + player1Score);
             gl.DrawText((int)Width / 2, (int)Height / 2 - 340, 0.3f, 0.3f, 1.0f, "Courier", 60, "" + player2Score);
-            gl.DrawText(50, (int)Height / 2 + 230, 1.0f, 0.3f, 0.3f, "Courier", 20, "Player 1");
+            //gl.DrawText(50, (int)Height / 2 + 230, 1.0f, 0.3f, 0.3f, "Courier", 20, "Player 1");
+
+            if (isPlayer1AI) {
+                gl.DrawText(50, (int)Height / 2 + 230, 1.0f, 0.3f, 0.3f, "Courier", 20, "AI");
+            }
+            else {
+                gl.DrawText(50, (int)Height / 2 + 230, 1.0f, 0.3f, 0.3f, "Courier", 20, "Player 1");
+            }
 
             if (isPlayer2AI) {
                 gl.DrawText((int)Width - 100, (int)Height / 2 + 230, 0.3f, 0.3f, 1.0f, "Courier", 20, "AI");
@@ -603,10 +623,10 @@ namespace battlepong_game {
                 }
 
                 Triangle.Position = new Vector3(-25.0f, 9 - (3.3f * indexSelected), commonZ + 12.0f);
+            }
 
-
-                //Debug
-                if (isTestToggled) {
+            //Debug
+            if (isTestToggled) {
                     LogFrame();
                     gl.DrawText(10, (int)Height - 90, 1.0f, 0.0f, 0, "Calibri", 10, "FPS: " + Math.Truncate(FPS) + " | Low: " + Math.Truncate(lowFPS) + " | High: " + Math.Truncate(highFPS) + " | Avg: " + Math.Truncate(avgFPS));
                     gl.DrawText(10, 50, 1.0f, 1.0f, 0, "Calibri", 10, "Angle Randomizer: " + angleRandom);
@@ -614,8 +634,8 @@ namespace battlepong_game {
                     gl.DrawText(10, 30, 1.0f, 1.0f, 0, "Calibri", 10, "Ball Vector Direction: " + ball.Velocity.x + ", " + ball.Velocity.y);
                     gl.DrawText(10, 20, 1.0f, 0.0f, 0, "Calibri", 10, "Reset in: " + resetCounter);
                     gl.DrawText(10, 10, 1.0f, 0.0f, 0, "Calibri", 10, "Speed: " + ball.Velocity.GetLength());
-                }
             }
+            
             #endregion
 
             #region Paddle Wall Collision and Ball Angle
@@ -647,19 +667,11 @@ namespace battlepong_game {
                 //ball.Position.y = ball.Position.y - 1.0f;
 
             }
-            //Ball reached bottom
-            //if (ball.Position.y - ball.Scale.x < maxVerticalBorder * -1 + UpperBoundary.Scale.y) {
-            //    wallHitSound.Play();
-            //    ball.Velocity.y = -ball.Velocity.y;
-            //   ball.Position.y = ball.Position.y + 1.0f;
-            //}
 
-            //Ball Collision for Player 1 Paddle
-            if ((ball.Position.x - ball.Scale.x <= player1Paddle.Position.x + player1Paddle.Scale.x) &&
-                (ball.Position.y + ball.Scale.x >= player1Paddle.Position.y - player1Paddle.Scale.y) &&
-                (ball.Position.y - ball.Scale.x <= player1Paddle.Position.y + player1Paddle.Scale.y) &&
-                //Prevent ball from colliding behind the paddle
-                (ball.Position.x > player1Paddle.Position.x)) {
+            if ((ball.LeftCollision() <= player1Paddle.RightCollision()) &&
+                (ball.BottomCollision() <= player1Paddle.TopCollision()) &&
+                (ball.TopCollision() >= player1Paddle.BottomCollision()) &&
+                (ball.RightCollision() > player1Paddle.LeftCollision())) { 
                 if (isSoundEnabled) {
                     paddleHitSound.Play();
                 }
@@ -680,11 +692,10 @@ namespace battlepong_game {
             }
 
             //Ball Collision for Player 2 Paddle
-            if ((ball.Position.x + ball.Scale.x >= player2Paddle.Position.x - player2Paddle.Scale.x) &&
-                (ball.Position.y + ball.Scale.x >= player2Paddle.Position.y - player2Paddle.Scale.y) &&
-                (ball.Position.y - ball.Scale.x <= player2Paddle.Position.y + player2Paddle.Scale.y) &&
-                //Prevent ball from colliding behind the paddle
-                (ball.Position.x < player2Paddle.Position.x)) {
+            if ((ball.LeftCollision() >= player2Paddle.LeftCollision()) &&
+                (ball.BottomCollision() <= player2Paddle.TopCollision()) &&
+                (ball.TopCollision() >= player2Paddle.BottomCollision()) &&
+                (ball.LeftCollision() < player2Paddle.RightCollision())) {
                 if (isSoundEnabled) {
                     paddleHitSound.Play();
                 }

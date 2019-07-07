@@ -58,10 +58,7 @@ namespace battlepong_game.Models {
             gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
             gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
             gl.Vertex(this.Position.x, this.Position.y + this.Scale.y, this.Position.z);
-
             gl.End();
-
-
         }
 
         public void DrawCube(OpenGL gl) {
@@ -208,6 +205,27 @@ namespace battlepong_game.Models {
             this.Velocity += this.Acceleration;
             this.Position += this.Velocity;
             this.Acceleration *= 0;
-        }      
+        } 
+
+        public float TopCollision()
+        {
+            return Position.y + Scale.y;
+        }
+
+        public float BottomCollision()
+        {
+            return Position.y - Scale.y;
+        }
+
+        public float RightCollision()
+        {
+            return Position.x + Scale.x;
+        }
+
+        public float LeftCollision()
+        {
+            return Position.x - Scale.x;
+        }
+
     }
 }
