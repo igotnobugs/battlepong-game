@@ -10,7 +10,7 @@ namespace battlepong_game.Models {
         public Vector3 Scale = new Vector3(0.5f, 0.5f, 0.5f);
         public Vector4 Color = new Vector4(0.5f, 0.5f, 0.5f, 0.5f);
         public float Radius = 0.5f;
-        public string Type = "Cube";
+        public bool enabledCollision = false;
 
         public Mesh() {
             this.Position = new Vector3();
@@ -42,7 +42,7 @@ namespace battlepong_game.Models {
             gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
             gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z);
             gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);   
+            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
             gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
             gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z);
             gl.End();
@@ -109,7 +109,6 @@ namespace battlepong_game.Models {
         public void DrawCircle(OpenGL gl, int Resolution = 50) {
 
             gl.LineWidth(2);
-            this.Type = "Circle";
             gl.Color(Color.x, Color.y, Color.z, Color.a);
             Resolution = (int)GameUtils.Constrain(Resolution, 10, 100);
             gl.Begin(OpenGL.GL_LINE_LOOP);
@@ -141,12 +140,10 @@ namespace battlepong_game.Models {
             gl.End();
         }
 
-        public void DrawBasketBall(OpenGL gl, int Resolution = 50)
-        {
-            this.Type = "Circle";
+        public void DrawBasketBall(OpenGL gl, int Resolution = 50) {
             gl.Color(Color.x, Color.y, Color.z);
             Resolution = (int)GameUtils.Constrain(Resolution, 10, 100);
-         
+
             //Main Circle
             gl.Begin(OpenGL.GL_LINE_LOOP);
             for (int ii = 0; ii < Resolution; ii++) {
@@ -205,27 +202,38 @@ namespace battlepong_game.Models {
             this.Velocity += this.Acceleration;
             this.Position += this.Velocity;
             this.Acceleration *= 0;
-        } 
+        }
 
-        public float TopCollision()
-        {
+        public float TopCollision() {
             return Position.y + Scale.y;
         }
 
-        public float BottomCollision()
-        {
+        public float BottomCollision() {
             return Position.y - Scale.y;
         }
 
-        public float RightCollision()
-        {
+        public float RightCollision() {
             return Position.x + Scale.x;
         }
 
-        public float LeftCollision()
-        {
+        public float LeftCollision() {
             return Position.x - Scale.x;
         }
 
+        public bool HasCollidedWith(Mesh target) {
+            bool xHasNotCollided =
+                this.Position.x - this.Scale.x - (this.Velocity.x / 2) > target.Position.x + target.Scale.x ||
+                this.Position.x + this.Scale.x + (this.Velocity.x / 2) < target.Position.x - target.Scale.x;
+
+            bool yHasNotCollided =
+                this.Position.y - this.Scale.y + (this.Velocity.y / 2) > target.Position.y + target.Scale.y ||
+                this.Position.y + this.Scale.y - (this.Velocity.y / 2) < target.Position.y - target.Scale.y;
+
+            bool zHasNotCollided =
+                this.Position.z - this.Scale.z > target.Position.z + target.Scale.z ||
+                this.Position.z + this.Scale.z < target.Position.z - target.Scale.z;
+
+            return !(xHasNotCollided || yHasNotCollided || zHasNotCollided);          
+        }
     }
 }

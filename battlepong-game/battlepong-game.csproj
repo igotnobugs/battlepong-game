@@ -120,8 +120,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Utilities\GameUtils.cs" />
-    <Compile Include="Utilities\Randomizer.cs" />
+    <Compile Include="Resources\Utilities\GameUtils.cs" />
+    <Compile Include="Resources\Utilities\Randomizer.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
