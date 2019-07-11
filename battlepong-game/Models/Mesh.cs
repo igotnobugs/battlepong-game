@@ -12,6 +12,8 @@ namespace battlepong_game.Models {
         public float Radius = 0.5f;
         public bool enabledCollision = false;
 
+        //public bool EnabledUpdate { get; set; }
+
         public Mesh() {
             this.Position = new Vector3();
             this.Velocity = new Vector3();
@@ -36,7 +38,8 @@ namespace battlepong_game.Models {
             this.Rotation = r;
         }
 
-        public void DrawSquare(OpenGL gl) {
+        public void DrawSquare(OpenGL gl, float lineWidth = 1.0f) {
+            gl.LineWidth(lineWidth);
             gl.Color(Color.x, Color.y, Color.z, Color.a);
             gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
             gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
@@ -52,7 +55,8 @@ namespace battlepong_game.Models {
             }
         }
 
-        public void DrawTriangle(OpenGL gl) {
+        public void DrawTriangle(OpenGL gl, float lineWidth = 1.0f) {
+            gl.LineWidth(lineWidth);
             gl.Color(Color.x, Color.y, Color.z, Color.a);
             gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
             gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
@@ -106,11 +110,12 @@ namespace battlepong_game.Models {
             }
         }
 
-        public void DrawCircle(OpenGL gl, int Resolution = 50) {
-
-            gl.LineWidth(2);
+        public void DrawCircle(OpenGL gl, float lineWidth = 1.0f, int Resolution = 50) {
+             
+            gl.LineWidth(lineWidth);
             gl.Color(Color.x, Color.y, Color.z, Color.a);
             Resolution = (int)GameUtils.Constrain(Resolution, 10, 100);
+
             gl.Begin(OpenGL.GL_LINE_LOOP);
             for (int ii = 0; ii < Resolution; ii++) {
                 double angle = 2.0f * Math.PI * ii / Resolution;
@@ -122,7 +127,8 @@ namespace battlepong_game.Models {
             UpdateMotion();
         }
 
-        public void DrawLine(OpenGL gl, Mesh origin, Vector3 target, float MultScale = 1.0f) {
+        public void DrawLine(OpenGL gl, Mesh origin, Vector3 target, float MultScale = 1.0f, float lineWidth = 1.0f) {
+            gl.LineWidth(lineWidth);
             gl.Color(Color.x, Color.y, Color.z);
             gl.Begin(OpenGL.GL_LINE_STRIP);
             gl.Vertex(origin.Position.x, origin.Position.y, origin.Position.z);
@@ -132,7 +138,8 @@ namespace battlepong_game.Models {
             UpdateMotion();
         }
 
-        public void DrawDottedLine(OpenGL gl, Vector3 origin, Vector3 target, float space = 0, float MultScale = 1.0f) {
+        public void DrawDottedLine(OpenGL gl, Vector3 origin, Vector3 target, float space = 0, float MultScale = 1.0f, float lineWidth = 1.0f) {
+            gl.LineWidth(lineWidth);
             gl.Color(Color.x, Color.y, Color.z);
             gl.Begin(OpenGL.GL_LINE_STRIP);
             gl.Vertex(origin.x, origin.y, origin.z);
@@ -199,9 +206,9 @@ namespace battlepong_game.Models {
         }
 
         private void UpdateMotion() {
-            this.Velocity += this.Acceleration;
-            this.Position += this.Velocity;
-            this.Acceleration *= 0;
+            Velocity += Acceleration;
+            Position += Velocity;
+            Acceleration *= 0;
         }
 
         public float TopCollision() {
@@ -222,16 +229,16 @@ namespace battlepong_game.Models {
 
         public bool HasCollidedWith(Mesh target) {
             bool xHasNotCollided =
-                this.Position.x - this.Scale.x - (this.Velocity.x / 2) > target.Position.x + target.Scale.x ||
-                this.Position.x + this.Scale.x + (this.Velocity.x / 2) < target.Position.x - target.Scale.x;
+                Position.x - Scale.x + (Velocity.x / 2) > target.Position.x + target.Scale.x ||
+                Position.x + Scale.x + (Velocity.x / 2) < target.Position.x - target.Scale.x;
 
             bool yHasNotCollided =
-                this.Position.y - this.Scale.y + (this.Velocity.y / 2) > target.Position.y + target.Scale.y ||
-                this.Position.y + this.Scale.y - (this.Velocity.y / 2) < target.Position.y - target.Scale.y;
+                Position.y - Scale.y + (Velocity.y / 2) > target.Position.y + target.Scale.y ||
+                Position.y + Scale.y + (Velocity.y / 2) < target.Position.y - target.Scale.y;
 
             bool zHasNotCollided =
-                this.Position.z - this.Scale.z > target.Position.z + target.Scale.z ||
-                this.Position.z + this.Scale.z < target.Position.z - target.Scale.z;
+                Position.z - Scale.z > target.Position.z + target.Scale.z ||
+                Position.z + Scale.z < target.Position.z - target.Scale.z;
 
             return !(xHasNotCollided || yHasNotCollided || zHasNotCollided);          
         }
