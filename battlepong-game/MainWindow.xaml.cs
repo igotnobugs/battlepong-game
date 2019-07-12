@@ -327,7 +327,7 @@ namespace battlepong_game {
 
                 //A shockwave when ball hit the boundaries
                 Mesh ballExplosion = new Mesh() {
-                    Position = ball.Position - ball.Velocity,
+                    Position = ball.Position - ball.Velocity - new Vector3(0,0,0.1f),
                     Radius = 1.0f,
                     Color = new Vector4(0.8f, 0.8f, 0.8f)
                 };
@@ -337,7 +337,7 @@ namespace battlepong_game {
                     ballExplosions.Add(ballExplosion);
                 }
                 
-                foreach (var explosions in ballExplosions) {              
+                foreach (var explosions in ballExplosions) {
                     //Reduce size and opacity
                     if (explosions.Radius < 6.0f) {
                         explosions.DrawCircle(gl, 5.0f);
@@ -515,7 +515,7 @@ namespace battlepong_game {
             if (ball.TopCollision() > UpperBoundary.BottomCollision() || ball.BottomCollision() < LowerBoundary.TopCollision()) { 
                 //Play Wall hit sound
                 wallHitSound.Play();
-                //Check if collision is with the upper boundary or the one below 
+                //Check if collision is with the upper boundary or the one below. Set Ball Position
                 ball.Position.y = ball.TopCollision() > UpperBoundary.BottomCollision() ? ball.Position.y - 1.0f : ball.Position.y + 1.0f;
                 //Change ball direction
                 ball.Velocity.y = -ball.Velocity.y;

@@ -4,7 +4,8 @@ using battlepong_game.Utilities;
 
 namespace battlepong_game.Models {
 
-    public class Mesh : Movable {
+    //Draw Functions
+    public partial class Mesh : Movable {
 
         public bool enabledUpdate = true;
         public Vector3 Scale = new Vector3(0.5f, 0.5f, 0.5f);
@@ -209,83 +210,6 @@ namespace battlepong_game.Models {
             Velocity += Acceleration;
             Position += Velocity;
             Acceleration *= 0;
-        }
-
-        public float TopCollision() {
-            return Position.y + Scale.y;
-        }
-
-        public float BottomCollision() {
-            return Position.y - Scale.y;
-        }
-
-        public float RightCollision() {
-            return Position.x + Scale.x;
-        }
-
-        public float LeftCollision() {
-            return Position.x - Scale.x;
-        }
-
-        public bool HasCollidedWith(Mesh target) {
-            bool xHasNotCollided =
-                Position.x - Scale.x + (Velocity.x / 2) > target.Position.x + target.Scale.x ||
-                Position.x + Scale.x + (Velocity.x / 2) < target.Position.x - target.Scale.x;
-
-            bool yHasNotCollided =
-                Position.y - Scale.y + (Velocity.y / 2) > target.Position.y + target.Scale.y ||
-                Position.y + Scale.y + (Velocity.y / 2) < target.Position.y - target.Scale.y;
-
-            bool zHasNotCollided =
-                Position.z - Scale.z > target.Position.z + target.Scale.z ||
-                Position.z + Scale.z < target.Position.z - target.Scale.z;
-
-            return !(xHasNotCollided || yHasNotCollided || zHasNotCollided);          
-        }
-
-        //AI Code
-        public void AIPaddle(Mesh ball, float visionDistance, bool lookRight, float maxSpeed, float friction, Vector3 acceleration, Mesh UpperBoundary, Mesh LowerBoundary, bool isOptionMenuOpen, bool willReturnToCenter, bool isEnabled) {
-            if (((ball.Position.x < Position.x + visionDistance) && lookRight) || ((ball.Position.x > Position.x - visionDistance) && !lookRight)) {
-                //Above paddle
-                if ((ball.Position.y > Position.y + (Scale.y / 2)) &&
-                (Position.y + Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y)) &&
-                !isOptionMenuOpen) {
-                    if (Velocity.y < maxSpeed) {
-                        ApplyForce(acceleration);
-                    }
-                    else {
-                        Velocity.y = maxSpeed;
-                    }
-                }
-                //Below paddle
-                else if ((ball.Position.y < Position.y - (Scale.y / 2)) &&
-                    (Position.y - Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y)) &&
-                    !isOptionMenuOpen) {
-                    if (Velocity.y > -maxSpeed) {
-                        ApplyForce(acceleration * -1);
-                    }
-                    else {
-                        Velocity.y = -maxSpeed;
-                    }
-                }
-                else {
-                    ApplyFriction(friction);
-                }
-            }
-            else {
-                //AI will return Paddle to center if enabled
-                if (willReturnToCenter && isEnabled) {
-                    if ((Position.y > -2) && (Position.y < 2)) {
-                        ApplyFriction(friction);
-                    }
-                    else if (Position.y > 0) {
-                        ApplyForce(acceleration * -1);
-                    }
-                    else {
-                        ApplyForce(acceleration);
-                    }
-                }
-            }
         }
     }
 }

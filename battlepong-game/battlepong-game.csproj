@@ -114,6 +114,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\AI.cs" />
+    <Compile Include="Models\Collision.cs" />
     <Compile Include="Models\Vector4.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
