@@ -80,13 +80,13 @@ namespace battlepong_game {
             Position = new Vector3(-50, 0, commonZ),
             Scale = new Vector3(1.0f, 6, 1),
             Mass = 1.0f,
-            Color = new Vector4(1.0f, 0.0f, 0.0f)
+            Color = new Vector4(1.0f, 0.3f, 0.3f)
         };
         private Mesh player2Paddle = new Mesh() {
             Position = new Vector3(50, 0, commonZ),
             Scale = new Vector3(1.0f, 6, 1),
             Mass = 1.0f,
-            Color = new Vector4(0.0f, 0.0f, 1.0f)
+            Color = new Vector4(0.3f, 0.3f, 1.0f)
         };
         private Mesh ball = new Mesh() {
             Position = new Vector3(0, 0, commonZ),
@@ -130,6 +130,11 @@ namespace battlepong_game {
             Scale = new Vector3(40, 20, 0),
             Color = new Vector4(0.2f, 0.2f, 0.2f, 0.7f)
         };
+        private Mesh ResultMenu = new Mesh() {
+            Position = new Vector3(0, 0, commonZ + 10.0f),
+            Scale = new Vector3(40, 20, 0),
+            Color = new Vector4(0.2f, 0.2f, 0.2f, 0.7f)
+        };
 
         #endregion
 
@@ -150,6 +155,7 @@ namespace battlepong_game {
         private Key startKey = Key.Enter;
         private Key player1Enable = Key.LeftShift;
         private Key player2Enable = Key.RightShift;
+        private Key restart = Key.R;
 
         //Stats
         private float player1MaxSpeed = 3.0f;
@@ -181,10 +187,12 @@ namespace battlepong_game {
         public bool isTestToggled = false;
         public bool isResetOngoing = false;
         public bool isRestarting = false;
+        public bool isGameOver = false;
         public float angleRandom;
         public int resetCounter = 30;
         public int player1Score = 0;
         public int player2Score = 0;
+        public int winningScore = 5;
         public float ballTime = 0;
         public float scoringLine = 10.0f;
         public bool didPlayer1Scored = false;
@@ -210,6 +218,9 @@ namespace battlepong_game {
         public string[] optionText = { "Max Ball Speed", "Test2", "Test3", "Test4", "Test5", "Restart Game" };
         public float[] optionSize = { 20.0f, 20.0f, 20.0f, 20.0f, 20.0f, 20.0f };
         public int indexSelected = 1;
+        public string[] resultText = { "Game Over", "Player 1 Won", "Player 2 Won" , "Press R to Restart" };
+        public float[] resultSize = { 30.0f, 50.0f, 50.0f, 20.0f };
+        
 
         //FPS
         public long lastFrame = GameUtils.NanoTime();
@@ -259,7 +270,7 @@ namespace battlepong_game {
 
             //Start 
             #region Main
-            if (isGameStarted && !isOptionMenuOpen) {
+            if (isGameStarted && !isOptionMenuOpen && !isGameOver) {
                 if (!isBallPlayed) {
                     ball.Color = new Vector4(1.0f, 1.0f, 1.0f);
                     ball.Position = new Vector3(0, 0, commonZ);
@@ -286,6 +297,12 @@ namespace battlepong_game {
                     }
                     angleRandom = (float)Randomizer.Generate(-angleDeviation, angleDeviation);
                 }
+            }
+
+            //Winnig check
+            if ((player1Score >= winningScore) || (player2Score >= winningScore)) {
+                isGameOver = true;
+                ball.enabledUpdate = false;
             }
             #endregion
 
@@ -372,8 +389,13 @@ namespace battlepong_game {
                 player2Paddle.enabledUpdate = Keyboard.IsKeyToggled(pauseKey) ? false : true;
                 waveOutDevice.Volume = Keyboard.IsKeyToggled(pauseKey) ? 0.5f : 1.0f;
             }
+            //Game Over and Restart
+            if (isGameOver && Keyboard.IsKeyDown(restart)) {
+                isGameOver = false;
+                player1Score = 0;
+                player2Score = 0;
+            }
 
-            
 
             //Quit Game
             if (Keyboard.IsKeyDown(playerOneQuitKey) || Keyboard.IsKeyDown(playerTwoQuitKey)) {
@@ -410,48 +432,7 @@ namespace battlepong_game {
             }
             else {
                 //AI Code
-                //If ball is within Vision distance from the
-                if (ball.Position.x < player1Paddle.Position.x + visionDistance) {
-                    //Above paddle
-                    if ((ball.Position.y > player1Paddle.Position.y) &&
-                    (player1Paddle.Position.y + player1Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y)) &&
-                    !isOptionMenuOpen) {
-                        if (player1Paddle.Velocity.y < player1MaxSpeed) {
-                            player1Paddle.ApplyForce(player1Accel);
-                        }
-                        else {
-                            player1Paddle.Velocity.y = player1MaxSpeed;
-                        }
-                    }
-                    //Below paddle
-                    else if ((ball.Position.y < player1Paddle.Position.y) &&
-                        (player1Paddle.Position.y - player1Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y)) &&
-                        !isOptionMenuOpen) {
-                        if (player1Paddle.Velocity.y > -player1MaxSpeed) {
-                            player1Paddle.ApplyForce(player1Accel * -1);
-                        }
-                        else {
-                            player1Paddle.Velocity.y = -player1MaxSpeed;
-                        }
-                    }
-                    else {
-                        player1Paddle.ApplyFriction(paddleFriction);
-                    }
-                }
-                else {
-                    //AI will return Paddle to center if enabled
-                    if (willReturnToCenter && isPlayer1AI) {
-                        if ((player1Paddle.Position.y > -2) && (player1Paddle.Position.y < 2)) {
-                            player2Paddle.ApplyFriction(paddleFriction);
-                        }
-                        else if (player1Paddle.Position.y > 0) {
-                            player1Paddle.ApplyForce(player1Accel * -1);
-                        }
-                        else {
-                            player1Paddle.ApplyForce(player1Accel);
-                        }
-                    }
-                }
+                player1Paddle.AIPaddle(ball, visionDistance, true, player1MaxSpeed, paddleFriction, player1Accel, UpperBoundary, LowerBoundary, isOptionMenuOpen, willReturnToCenter, isPlayer1AI); 
             }
 
             //Check if AI is not enabled, if so allow Player 2 controls
@@ -482,48 +463,7 @@ namespace battlepong_game {
             }
             else {
                 //AI Code
-                //If ball is within Vision distance
-                if (ball.Position.x > player2Paddle.Position.x - visionDistance) {
-                    //Above paddle
-                    if ((ball.Position.y > player2Paddle.Position.y) &&
-                    (player2Paddle.Position.y + player2Paddle.Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y)) &&
-                    !isOptionMenuOpen) {
-                        if (player2Paddle.Velocity.y < player2MaxSpeed) {
-                            player2Paddle.ApplyForce(player2Accel);
-                        }
-                        else {
-                            player2Paddle.Velocity.y = player2MaxSpeed;
-                        }
-                    }
-                    //Below paddle
-                    else if ((ball.Position.y < player2Paddle.Position.y) &&
-                        (player2Paddle.Position.y - player2Paddle.Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y)) &&
-                        !isOptionMenuOpen) {
-                        if (player2Paddle.Velocity.y > -player2MaxSpeed) {
-                            player2Paddle.ApplyForce(player2Accel * -1);
-                        }
-                        else {
-                            player2Paddle.Velocity.y = -player2MaxSpeed;
-                        }
-                    }
-                    else {
-                        player2Paddle.ApplyFriction(paddleFriction);
-                    }
-                }
-                else {
-                    //AI will return Paddle to center if enabled
-                    if (willReturnToCenter) {
-                        if ((player2Paddle.Position.y > -2) && (player2Paddle.Position.y <  2)) {
-                            player2Paddle.ApplyFriction(paddleFriction);
-                        }
-                        else if (player2Paddle.Position.y > 0) {
-                            player2Paddle.ApplyForce(player2Accel * -1/2);
-                        }
-                        else {
-                            player2Paddle.ApplyForce(player2Accel / 2);
-                        }
-                    }
-                }
+                player2Paddle.AIPaddle(ball, visionDistance, false, player2MaxSpeed, paddleFriction, player2Accel, UpperBoundary, LowerBoundary, isOptionMenuOpen, willReturnToCenter, isPlayer2AI);
             }
             #endregion
 
@@ -662,6 +602,21 @@ namespace battlepong_game {
                 }
 
                 Triangle.Position = new Vector3(-25.0f, 9 - (3.3f * indexSelected), commonZ + 12.0f);
+            }
+
+            //Results Menu
+            if (isGameOver) {
+                gl.LoadIdentity();
+                gl.Translate(0.0f, .0f, -150.0f);
+                ResultMenu.DrawSquare(gl);
+                gl.DrawText((int)Width / 2 - ((int)(resultSize[0] * cons) * resultText[0].Length), (int)Height / 2 + 60, 0.5f, 1.0f, 0.5f, "Courier New", resultSize[0], resultText[0]);
+                if (player1Score > player2Score) {
+                    gl.DrawText((int)Width / 2 - ((int)(resultSize[1] * cons) * resultText[1].Length), (int)Height / 2 - 30, 1.0f, 0.3f, 0.3f, "Courier New", resultSize[1], resultText[1]);
+                } else {
+                    gl.DrawText((int)Width / 2 - ((int)(resultSize[2] * cons) * resultText[2].Length), (int)Height / 2 - 30, 0.3f, 0.3f, 1.0f, "Courier New", resultSize[2], resultText[2]);
+                }
+                gl.DrawText((int)Width / 2 - ((int)(resultSize[3] * cons) * resultText[3].Length), (int)Height / 2 - 140, 1.0f, 1.0f, 1.0f, "Courier New", resultSize[3], resultText[3]);
+
             }
 
             //Debug

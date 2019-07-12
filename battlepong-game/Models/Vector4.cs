@@ -21,7 +21,7 @@ namespace battlepong_game.Models {
             return new Vector4(left.x + right.x,
                 left.y + right.y,
                 left.z + right.z,
-                left.z + right.a);
+                left.a + right.a);
         }
 
         public static Vector4 operator -(Vector4 left, Vector4 right) {
@@ -29,6 +29,10 @@ namespace battlepong_game.Models {
                 left.y - right.y,
                 left.z - right.z,
                 left.a - right.a);
+        }
+
+        public override string ToString() {
+            return "x: " + x + " y: " + y + " z: " + z + " a: " + a;
         }
     }
 }

@@ -8,7 +8,7 @@ namespace battlepong_game.Models {
         public static Vector3 Down = new Vector3(0, -1, 0);
         public static Vector3 Left = new Vector3(-1, 0, 0);
         public static Vector3 Right = new Vector3(1, 0, 0);
-        public float x, y, z, a; //vector coordinates
+        public float x, y, z; //vector coordinates
 
         // default constructor, 0,0,0 
         public Vector3() {

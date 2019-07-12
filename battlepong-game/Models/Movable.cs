@@ -33,17 +33,15 @@ namespace battlepong_game.Models {
 
         public void ChangeAngle(float angle) {
             var speed = this.Velocity.GetLength();
-            this.Velocity.x = speed * (float)Math.Cos(GameUtils.DegreeToRadian(angle));
-            this.Velocity.y = speed * (float)Math.Sin(GameUtils.DegreeToRadian(angle));
+            //this.Velocity.x = speed * (float)Math.Cos(GameUtils.DegreeToRadian(angle));
+            //this.Velocity.y = speed * (float)Math.Sin(GameUtils.DegreeToRadian(angle));
+            //Vector Velocity changed to Specific Angle Multiplied by Speed
+            Velocity = new Vector3((float)Math.Cos(GameUtils.DegreeToRadian(angle)), (float)Math.Sin(GameUtils.DegreeToRadian(angle)), Velocity.z) * speed;
         }
 
         public void IncreaseSpeed(float speed) {
-            var curSpeed = this.Velocity.GetLength();         
-            var curAngle = Math.Atan2(this.Velocity.y, this.Velocity.x);
-
-            //Velocity = Velocity * (1 + speed);
-            this.Velocity.x = (curSpeed + speed) * (float)Math.Cos(curAngle);
-            this.Velocity.y = (curSpeed + speed) * (float)Math.Sin(curAngle);
+            var curSpeed = this.Velocity.GetLength();
+            Velocity = (Velocity.Normalized() * (curSpeed + speed));
         }
     }
 }
