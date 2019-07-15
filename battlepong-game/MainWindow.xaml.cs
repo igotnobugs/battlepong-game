@@ -121,19 +121,33 @@ namespace battlepong_game {
             Color = new Vector4(0.5f, 0.5f, 0.5f)
         };
         private Mesh StartMenu = new Mesh() {
-            Position = new Vector3(0, 0, commonZ + 10.0f),
-            Scale = new Vector3(40, 20, 0),
+            Position = new Vector3(0, 0, commonZ + 50.0f),
+            Scale = new Vector3(20, 10, 5),
             Color = new Vector4(0.1f, 0.1f, 0.1f, 0.9f)
         };
         private Mesh OptionMenu = new Mesh() {
-            Position = new Vector3(0, 0, commonZ + 10.0f),
-            Scale = new Vector3(40, 20, 0),
+            Position = new Vector3(0, 0, commonZ + 50.0f),
+            Scale = new Vector3(20, 10, 5),
             Color = new Vector4(0.2f, 0.2f, 0.2f, 0.7f)
         };
         private Mesh ResultMenu = new Mesh() {
-            Position = new Vector3(0, 0, commonZ + 10.0f),
-            Scale = new Vector3(40, 20, 0),
+            Position = new Vector3(0, 0, commonZ + 50.0f),
+            Scale = new Vector3(20, 10, 0),
             Color = new Vector4(0.2f, 0.2f, 0.2f, 0.7f)
+        };
+        private Mesh Line = new Mesh() {
+            Color = new Vector4(0.6f, 0.1f, 0.6f, 0.4f)
+        };
+        private Mesh Moon = new Mesh() {
+            Position = new Vector3(0, 5, commonZ - 50.0f),
+            Radius = 10,
+            Color = new Vector4(0.6f, 0.1f, 0.6f, 0.4f)
+        };
+        private Mesh Ground = new Mesh() {
+            Position = new Vector3(0, -50, commonZ - 40.0f),
+            Scale = new Vector3(20, 50, 0),
+            Color = new Vector4(0.0f, 0.0f, 0.0f)
+
         };
 
         #endregion
@@ -238,13 +252,48 @@ namespace battlepong_game {
 
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
-            gl.LoadIdentity();
-            gl.Translate(0.0f, .0f, -150.0f);
-            gl.LookAt(0, 2.0f, -1.0f, 0, 2.0f, -150.0f, 0, 1, 0);
+            //gl.Perspective(90, Width / Height, 0.5f, 5000.0f);
 
-            CenterLine.DrawDottedLine(gl, new Vector3(0, LowerBoundary.Position.y, commonZ - 1.0f), new Vector3(0, UpperBoundary.Position.y, commonZ - 1.0f));
-            Player1Line.DrawDottedLine(gl, new Vector3(player1Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player1Paddle.Position.x, UpperBoundary.Position.y, commonZ));
-            Player2Line.DrawDottedLine(gl, new Vector3(player2Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player2Paddle.Position.x, UpperBoundary.Position.y, commonZ));
+            //gl.LoadIdentity();
+
+            //gl.Translate(0.0f, 0.0f, -150.0f);
+            //gl.LookAt(0, 1.0f, -50.0f, 0, 1.0f, -250.0f, 0, 1, 0);
+            //gl.Scale(0.5, 0.5, 1);
+            //gl.Rotate(0, 0, 0);
+            //Moon.DrawBasketBall(gl, 2, 100);
+            //Moon.Rotation += 0.1f;
+
+            //Ground.DrawSquare(gl);
+
+            gl.LoadIdentity();
+            gl.Translate(0.0f, 0.0f, -150.0f);
+            gl.LookAt(ball.Position.x / 8, 1.0f, -50.0f, ball.Position.x / 8, 1.0f, -250.0f, 0, 1, 0);
+            gl.Scale(0.5, 0.5, 1);
+
+            
+            //Center Line
+            Line.DrawDottedLine(gl, new Vector3(-250, 0, commonZ - 50), new Vector3(250, 0, commonZ - 50));
+            //Vertical Lines To Right
+            for (int i = 0; i < 25; i++) {
+                Line.DrawDottedLine(gl, new Vector3(10 * i, -30, commonZ), new Vector3(10 * i, 0, commonZ - 50));
+            }
+            //Vertical Lines to Left
+            for (int i = 1; i < 25; i++) {
+                Line.DrawDottedLine(gl, new Vector3(-10 * i, -30, commonZ), new Vector3(-10 * i, 0, commonZ - 50));
+            }
+            //Horizontal Lines up to Down;
+            for (int i = 0; i < 13; i++) {
+                Line.DrawDottedLine(gl, new Vector3(-250, 0 - (3 * i), commonZ - 50 + (3 * i)), new Vector3(250, 0 - (3 * i), commonZ - 50 + (3 * i)));
+            }
+
+            gl.LoadIdentity();
+            gl.Translate(0.0f, 0.0f, -150.0f);
+            gl.LookAt(0, 1.0f, -50.0f, 0, 1.0f, -250.0f, 0, 1, 0);
+
+            gl.Scale(0.5, 0.5, 1);
+            //CenterLine.DrawDottedLine(gl, new Vector3(0, LowerBoundary.Position.y, commonZ - 1.0f), new Vector3(0, UpperBoundary.Position.y, commonZ - 1.0f));
+            Player1Line.DrawDottedLine(gl, new Vector3(player1Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player1Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
+            Player2Line.DrawDottedLine(gl, new Vector3(player2Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player2Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
 
             UpperBoundary.DrawSquare(gl);
             LowerBoundary.DrawSquare(gl);
@@ -254,7 +303,7 @@ namespace battlepong_game {
 
             ball.DrawSquare(gl);
 
-            gl.Color(0, 255, 0);
+            //gl.Color(0, 255, 0);
 
             //Start main music
             if (!isStartMusPlayed) {
