@@ -136,7 +136,7 @@ namespace battlepong_game {
             Color = new Vector4(0.2f, 0.2f, 0.2f, 0.7f)
         };
         private Mesh Line = new Mesh() {
-            Color = new Vector4(0.6f, 0.1f, 0.6f, 0.4f)
+            Color = new Vector4(0.6f, 0.1f, 0.6f, 0.6f)
         };
         private Mesh Moon = new Mesh() {
             Position = new Vector3(0, 5, commonZ - 50.0f),
@@ -216,6 +216,7 @@ namespace battlepong_game {
         public Vector4 lighterColor = new Vector4(0.1f, 0.1f, 0.1f);
         public List<Mesh> ballTrails = new List<Mesh>();
         public List<Mesh> ballExplosions = new List<Mesh>();
+        public List<Mesh> landLines = new List<Mesh>();
 
         //AI CODE
         public bool isPlayer1AI = false;
@@ -234,7 +235,7 @@ namespace battlepong_game {
         public int indexSelected = 1;
         public string[] resultText = { "Game Over", "Player 1 Won", "Player 2 Won" , "Press R to Restart" };
         public float[] resultSize = { 30.0f, 50.0f, 50.0f, 20.0f };
-        
+        public float move = -1;
 
         //FPS
         public long lastFrame = GameUtils.NanoTime();
@@ -281,10 +282,28 @@ namespace battlepong_game {
             for (int i = 1; i < 25; i++) {
                 Line.DrawDottedLine(gl, new Vector3(-10 * i, -30, commonZ), new Vector3(-10 * i, 0, commonZ - 50));
             }
+            Mesh LandLine = new Mesh() {
+                Color = new Vector4(0.6f, 0.1f, 0.6f, 0.6f)
+            };
+
             //Horizontal Lines up to Down;
+            if (move > 3) { move = 0; } else { move += 0.1f; }
             for (int i = 0; i < 13; i++) {
-                Line.DrawDottedLine(gl, new Vector3(-250, 0 - (3 * i), commonZ - 50 + (3 * i)), new Vector3(250, 0 - (3 * i), commonZ - 50 + (3 * i)));
+                //Line.DrawDottedLine(gl, new Vector3(-250, 0 - (3 * i), commonZ - 50 + (3 * i)), new Vector3(250, 0 - (3 * i), commonZ - 50 + (3 * i)));
+                landLines.Add(LandLine);
+                move++;
             }
+            //landLines.Add(LandLine);
+            foreach (var line in landLines) {
+                line.DrawDottedLine(gl, new Vector3(-250, 0 - (3 * move), commonZ - 50 + (3 * move)), new Vector3(250, 0 - (3 * move), commonZ - 50 + (3 * move)));            
+                if (line.Position.y > -30) {
+                    line.Position.y -= 0.2f;
+                } else {
+                    line.Position.y = 0;
+                }
+            }
+
+            //if (move >= 3) { move = 0; } else { move += 0.2f;  }
 
             gl.LoadIdentity();
             gl.Translate(0.0f, 0.0f, -150.0f);
