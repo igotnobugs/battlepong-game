@@ -116,12 +116,19 @@
     </ApplicationDefinition>
     <Compile Include="Models\AI.cs" />
     <Compile Include="Models\Collision.cs" />
+    <Compile Include="Models\Paddle.cs" />
     <Compile Include="Models\Vector4.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Properties\strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>strings.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\Controls.cs" />
     <Compile Include="Utilities\GameUtils.cs" />
     <Compile Include="Utilities\Randomizer.cs" />
     <Page Include="MainWindow.xaml">
@@ -153,6 +160,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

@@ -10,7 +10,6 @@
     <Grid>
 		<sharpGL:OpenGLControl
             OpenGLDraw="OpenGLControl_OpenGLDraw"
-            OpenGLInitialized="OpenGLControl_OpenGLInitialized"
 			MouseMove="OnMouseMove"
             RenderContextType="FBO" />
 	</Grid>

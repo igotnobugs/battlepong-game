@@ -5,12 +5,11 @@ namespace battlepong_game.Models {
     //Main AI code
     public partial class Mesh : Movable {
 
-        public void AIPaddle(Mesh ball, float visionDistance, bool lookRight, float maxSpeed, float friction, Vector3 acceleration, Mesh UpperBoundary, Mesh LowerBoundary, bool isOptionMenuOpen, bool willReturnToCenter, bool isEnabled) {
+        public void AIPaddle(Mesh ball, float visionDistance, bool lookRight, float maxSpeed, float friction, Vector3 acceleration, float topLimit, float bottomLimit, bool willReturnToCenter) {
             if (((ball.Position.x < Position.x + visionDistance) && lookRight) || ((ball.Position.x > Position.x - visionDistance) && !lookRight)) {
                 //Above paddle
                 if ((ball.Position.y > Position.y + (Scale.y / 2)) &&
-                (Position.y + Scale.y <= UpperBoundary.Position.y - (UpperBoundary.Scale.y)) &&
-                !isOptionMenuOpen) {
+                (Position.y + Scale.y <= topLimit)) {
                     if (Velocity.y < maxSpeed) {
                         ApplyForce(acceleration);
                     }
@@ -20,8 +19,7 @@ namespace battlepong_game.Models {
                 }
                 //Below paddle
                 else if ((ball.Position.y < Position.y - (Scale.y / 2)) &&
-                    (Position.y - Scale.y >= LowerBoundary.Position.y + (LowerBoundary.Scale.y)) &&
-                    !isOptionMenuOpen) {
+                    (Position.y - Scale.y >= bottomLimit)) {
                     if (Velocity.y > -maxSpeed) {
                         ApplyForce(acceleration * -1);
                     }
@@ -35,7 +33,7 @@ namespace battlepong_game.Models {
             }
             else {
                 //AI will return Paddle to center if enabled
-                if (willReturnToCenter && isEnabled) {
+                if (willReturnToCenter) {
                     if ((Position.y > -2) && (Position.y < 2)) {
                         ApplyFriction(friction);
                     }
