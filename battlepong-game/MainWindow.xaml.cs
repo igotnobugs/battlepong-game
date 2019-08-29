@@ -501,7 +501,6 @@ namespace battlepong_game {
             #endregion
 
             #region Ball Collision
-
             //Ball collided with top or bottom plus safety checks
             if (ball.TopCollision() > UpperBoundary.BottomCollision() || ball.BottomCollision() < LowerBoundary.TopCollision()) { 
                 //Play Wall hit sound
