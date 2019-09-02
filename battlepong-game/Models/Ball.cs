@@ -6,35 +6,41 @@ using System.Threading.Tasks;
 using SharpGL;
 
 namespace battlepong_game.Models {
-    public partial class Effects : Mesh {
+    public partial class Ball : Mesh {
 
-        public List<Mesh> ballTrails = new List<Mesh>();
         public List<Mesh> ballExplosions = new List<Mesh>();
+        public List<Mesh> ballTrails = new List<Mesh>();
 
-        public void addTrails(OpenGL gl, Mesh ball, bool isOptionMenuOpen) {
+        public void AddTrails(OpenGL gl, bool isOptionMenuOpen) {
             Mesh ballTrail = new Mesh() {
-                Position = ball.Position - ball.Velocity - new Vector3(0, 0, 0.5f),
+                Position = this.Position - this.Velocity - new Vector3(0, 0, 0.5f),
                 Scale = new Vector3(0.8f, 0.8f, 0),
             };
             ballTrails.Add(ballTrail);
             foreach (var trail in ballTrails) {
-                trail.Color = ball.Color - new Vector4(0.2f, 0.2f, 0.2f, 0.0f);
+                trail.Color = this.Color - new Vector4(0.2f, 0.2f, 0.2f, 0.0f);
                 //Reduce size
                 if (trail.Scale.x > 0) {
                     trail.DrawSquare(gl);
                     if (!isOptionMenuOpen) {
-                        trail.Scale = trail.Scale - 0.06f;
+                        trail.Scale -= 0.06f;
                     }
                 }
             }
         }
 
-        public void addExplosion(OpenGL gl, Mesh ball, bool isOptionMenuOpen) {
+        public void AddExplosion(OpenGL gl, float maxVerticalBorder, Mesh UpperBoundary, bool isOptionMenuOpen) {
             Mesh ballExplosion = new Mesh() {
-                Position = ball.Position - ball.Velocity - new Vector3(0, 0, 0.1f),
+                Position = this.Position - this.Velocity - new Vector3(0, 0, 0.1f),
                 Radius = 1.0f,
                 Color = new Vector4(0.8f, 0.8f, 0.8f)
             };
+
+            //Ball hitting top or bottom
+            if ((this.Position.y + this.Scale.x > maxVerticalBorder - UpperBoundary.Scale.y) ||
+                (this.Position.y - this.Scale.x < maxVerticalBorder * -1 + UpperBoundary.Scale.y)) {
+                ballExplosions.Add(ballExplosion);
+            }
 
             foreach (var explosions in ballExplosions) {
                 //Reduce size and opacity
@@ -47,5 +53,6 @@ namespace battlepong_game.Models {
                 }
             }
         }
+
     }
 }

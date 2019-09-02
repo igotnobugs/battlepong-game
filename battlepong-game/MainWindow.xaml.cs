@@ -90,7 +90,7 @@ namespace battlepong_game {
             Mass = 1.0f,
             Color = new Vector4(0.3f, 0.3f, 1.0f)
         };
-        private Mesh ball = new Mesh() {
+        private Ball ball = new Ball() {
             Position = new Vector3(0, 0, commonZ),
             Scale = new Vector3(1, 1, 1),
             Color = new Vector4(1.0f, 1.0f, 1.0f, 0.0f)
@@ -249,49 +249,58 @@ namespace battlepong_game {
 
         public Controls Control = new Controls();
 
-        public void OpenGLControl_OpenGLDraw(object sender, SharpGL.SceneGraph.OpenGLEventArgs args) {
-            
-            OpenGL gl = args.OpenGL;
-            Render3D(gl);
-
-            gl.Viewport(0, 0, (int)Width, (int)Height);
-
-            gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
-
-            gl.LoadIdentity();
-            gl.Translate(0.0f, 0.0f, -150.0f);
-            gl.LookAt(ball.Position.x / 8, 1.0f, -50.0f, ball.Position.x / 8, 1.0f, -250.0f, 0, 1, 0);
-            gl.Scale(0.5, 0.5, 1);
-                 
+        public void DrawGridLines(OpenGL gl) {
             //Center Line
-            Line.DrawDottedLine(gl, new Vector3(-250, 0, commonZ - 50), new Vector3(250, 0, commonZ - 50));
+            Line.DrawSimpleLine(gl, new Vector3(-250, 0, commonZ - 50), new Vector3(250, 0, commonZ - 50));
             //Vertical Lines To Right
-            for (int i = 0; i < 25; i++) {
-                Line.DrawDottedLine(gl, new Vector3(10 * i, -30, commonZ), new Vector3(10 * i, 0, commonZ - 50));
+            for (int i = 0; i < 25; i++)
+            {
+                Line.DrawSimpleLine(gl, new Vector3(10 * i, -30, commonZ), new Vector3(10 * i, 0, commonZ - 50));
             }
             //Vertical Lines to Left
-            for (int i = 1; i < 25; i++) {
-                Line.DrawDottedLine(gl, new Vector3(-10 * i, -30, commonZ), new Vector3(-10 * i, 0, commonZ - 50));
+            for (int i = 1; i < 25; i++)
+            {
+                Line.DrawSimpleLine(gl, new Vector3(-10 * i, -30, commonZ), new Vector3(-10 * i, 0, commonZ - 50));
             }
-            for (int i = 0; i < 13; i++) {
-                Line.DrawDottedLine(gl, new Vector3(-250, 0 - (3 * i), commonZ - 50 + (3 * i)), new Vector3(250, 0 - (3 * i), commonZ - 50 + (3 * i)));
+            for (int i = 0; i < 13; i++)
+            {
+                Line.DrawSimpleLine(gl, new Vector3(-250, 0 - (3 * i), commonZ - 50 + (3 * i)), new Vector3(250, 0 - (3 * i), commonZ - 50 + (3 * i)));
             }
+        }
 
-            gl.LoadIdentity();
-            gl.Translate(0.0f, 0.0f, -150.0f);
-            gl.LookAt(0, 1.0f, -50.0f, 0, 1.0f, -250.0f, 0, 1, 0);
-
-            gl.Scale(0.5, 0.5, 1);
-            Player1Line.DrawDottedLine(gl, new Vector3(player1Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player1Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
-            Player2Line.DrawDottedLine(gl, new Vector3(player2Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player2Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
+        public void DrawArena(OpenGL gl) {
+            gl.Scale(0.5, 0.5, 1); //Hack-Fix
+            Player1Line.DrawSimpleLine(gl, new Vector3(player1Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player1Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
+            Player2Line.DrawSimpleLine(gl, new Vector3(player2Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player2Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
 
             UpperBoundary.DrawSquare(gl);
             LowerBoundary.DrawSquare(gl);
 
             player1Paddle.DrawSquare(gl);
             player2Paddle.DrawSquare(gl);
-
             ball.DrawSquare(gl);
+        }
+
+        public void OpenGLControl_OpenGLDraw(object sender, SharpGL.SceneGraph.OpenGLEventArgs args) {
+            
+            OpenGL gl = args.OpenGL;
+            Render3D(gl);
+
+            gl.Viewport(0, 0, (int)Width, (int)Height);
+            gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
+
+            gl.LoadIdentity();
+            gl.Translate(0.0f, 0.0f, -150.0f);
+            gl.LookAt(ball.Position.x / 8, 1.0f, -50.0f, ball.Position.x / 8, 1.0f, -250.0f, 0, 1, 0);
+            gl.Scale(0.5, 0.5, 1);
+
+            DrawGridLines(gl);
+
+            gl.LoadIdentity();
+            gl.Translate(0.0f, 0.0f, -150.0f);
+            gl.LookAt(0, 1.0f, -50.0f, 0, 1.0f, -250.0f, 0, 1, 0);
+
+            DrawArena(gl);
 
             //Start main music
             if (!isStartMusPlayed) {
@@ -346,45 +355,10 @@ namespace battlepong_game {
             #region Ball Aesthetics
             //Draw ball trails
             if (isBallPlayed) {
-                Mesh ballTrail = new Mesh() {
-                    Position = ball.Position - ball.Velocity - new Vector3(0, 0, 0.5f),
-                    Scale = new Vector3(0.8f, 0.8f, 0),
-                };
-                ballTrails.Add(ballTrail);
-                foreach (var trail in ballTrails) {
-                    trail.Color = ball.Color - new Vector4(0.2f, 0.2f, 0.2f, 0.0f);
-                    //Reduce size
-                    if (trail.Scale.x > 0) {
-                        trail.DrawSquare(gl);
-                        if (!isOptionMenuOpen) {
-                            trail.Scale = trail.Scale - 0.06f;
-                        }
-                    }
-                }
-
+                //Add a trail to the ball
+                ball.AddTrails(gl, isOptionMenuOpen);
                 //A shockwave when ball hit the boundaries
-                Mesh ballExplosion = new Mesh() {
-                    Position = ball.Position - ball.Velocity - new Vector3(0,0,0.1f),
-                    Radius = 1.0f,
-                    Color = new Vector4(0.8f, 0.8f, 0.8f)
-                };
-                //Ball hitting top or bottom
-                if ((ball.Position.y + ball.Scale.x > maxVerticalBorder - UpperBoundary.Scale.y) ||
-                    (ball.Position.y - ball.Scale.x < maxVerticalBorder * -1 + UpperBoundary.Scale.y)) {
-                    ballExplosions.Add(ballExplosion);
-                }
-                
-                foreach (var explosions in ballExplosions) {
-                    //Reduce size and opacity
-                    if (explosions.Radius < 6.0f) {
-                        explosions.DrawCircle(gl, 5.0f);
-                        if (!isOptionMenuOpen) {
-                            explosions.Radius += (6.0f - explosions.Radius) / 2 ;
-                            explosions.Color.a -= 0.2f;
-                        }
-                    }
-                }
-                
+                ball.AddExplosion(gl, maxVerticalBorder, UpperBoundary, isOptionMenuOpen);                
             }
             #endregion
 
@@ -396,12 +370,6 @@ namespace battlepong_game {
                     isBallPlayed = false;
                     isResetOngoing = false;
                 }
-            }
-            #endregion
-
-            #region Restart Code
-            if (isRestarting) {
-
             }
             #endregion
 
@@ -503,11 +471,8 @@ namespace battlepong_game {
             #region Ball Collision
             //Ball collided with top or bottom plus safety checks
             if (ball.TopCollision() > UpperBoundary.BottomCollision() || ball.BottomCollision() < LowerBoundary.TopCollision()) { 
-                //Play Wall hit sound
                 wallHitSound.Play();
-                //Check if collision is with the upper boundary or the one below. Set Ball Position
                 ball.Position.y = ball.TopCollision() > UpperBoundary.BottomCollision() ? ball.Position.y - 1.0f : ball.Position.y + 1.0f;
-                //Change ball direction
                 ball.Velocity.y = -ball.Velocity.y;
 
             }

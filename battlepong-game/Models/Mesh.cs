@@ -135,11 +135,10 @@ namespace battlepong_game.Models {
             gl.Vertex(origin.Position.x, origin.Position.y, origin.Position.z);
             gl.Vertex((origin.Position.x + target.x) * MultScale, (origin.Position.y + target.y) * MultScale, origin.Position.z);
             gl.End();
-
             UpdateMotion();
         }
 
-        public void DrawDottedLine(OpenGL gl, Vector3 origin, Vector3 target, float lineWidth = 1.0f, float MultScale = 1.0f, float space = 0) {
+        public void DrawSimpleLine(OpenGL gl, Vector3 origin, Vector3 target, float lineWidth = 1.0f) {
             gl.LineWidth(lineWidth);
             gl.Color(Color.x, Color.y, Color.z, Color.a);
             gl.Begin(OpenGL.GL_LINE_STRIP);

@@ -115,8 +115,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\AI.cs" />
+    <Compile Include="Models\Ball.cs" />
     <Compile Include="Models\Collision.cs" />
-    <Compile Include="Models\Effects.cs" />
     <Compile Include="Models\Paddle.cs" />
     <Compile Include="Models\Vector4.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
