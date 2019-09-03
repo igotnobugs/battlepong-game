@@ -40,39 +40,6 @@ namespace battlepong_game {
             //Console.WriteLine((mousePos.x) + " " + (mousePos.y));
         }
 
-        private void Render3D(OpenGL gl) {
-            //OpenGL gl = args.OpenGL;
-            //Set Background Color
-            //gl.ClearColor(0.7f, 0.7f, 0.9f, 0.0f);
-
-            gl.Enable(OpenGL.GL_DEPTH_TEST);
-            float[] global_ambient = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
-            float[] light0pos = new float[] { 1.0f, 1.0f, 1.0f, 0.0f };
-            float[] light0ambient = new float[] { 0.0f, 0.0f, 0.0f, 1.0f };
-            float[] light0diffuse = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
-            float[] light0specular = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
-            float[] lmodel_ambient = new float[] { 1.2f, 1.2f, 1.2f, 1.0f };
-            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
-            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
-
-            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, light0pos);
-            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_AMBIENT, light0ambient);
-            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, light0diffuse);
-            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPECULAR, light0specular);
-
-            gl.Enable(OpenGL.GL_LIGHTING);
-            gl.Enable(OpenGL.GL_LIGHT0);
-
-            gl.ColorMaterial(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT_AND_DIFFUSE);
-            gl.Enable(OpenGL.GL_COLOR_MATERIAL);
-
-            gl.ShadeModel(OpenGL.GL_SMOOTH);
-            gl.Enable(OpenGL.GL_LINE_SMOOTH);
-
-            gl.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
-            gl.Enable(OpenGL.GL_BLEND);
-        }
-
         //The common z coordinate for most meshes
         private static float commonZ = 50.0f;
 
@@ -173,13 +140,6 @@ namespace battlepong_game {
         private Key player2Enable = Key.RightShift;
         private Key restart = Key.R;
 
-        //Stats
-        private float player1MaxSpeed = 3.0f;
-        private Vector3 player1Accel = new Vector3(0, 0.5f, 0);
-        private float player2MaxSpeed = 3.0f;
-        private Vector3 player2Accel = new Vector3(0, 0.5f, 0);
-        private float paddleFriction = 0.5f;
-
         //GameSettings
         //private float maxHorizontalBorder = 50.0f;
         public float maxVerticalBorder = 30.0f;
@@ -213,7 +173,7 @@ namespace battlepong_game {
         public float scoringLine = 10.0f;
         public bool didPlayer1Scored = false;
         public int framesToCount = 120;
-        public float maxBallVelocity = 3.0f;
+        //public float maxBallVelocity = 3.0f;
         public float angleDeviation = 5.0f;
         public Vector4 lighterColor = new Vector4(0.1f, 0.1f, 0.1f);
         public List<Mesh> ballTrails = new List<Mesh>();
@@ -225,7 +185,6 @@ namespace battlepong_game {
         public bool isPlayer2AI = true;
         public bool willReturnToCenter = true;
         //private bool willPredictTrajectory = false;
-        public int visionDistance = 50;
 
         //String Variables
         public float cons = 0.375f; //Monospace Constant to be able to get the length of string
@@ -249,7 +208,53 @@ namespace battlepong_game {
 
         public Controls Control = new Controls();
 
-        public void DrawGridLines(OpenGL gl) {
+        #region GL Draw Functions
+        private void Render3D(OpenGL gl)
+        {
+            //OpenGL gl = args.OpenGL;
+            //Set Background Color
+            //gl.ClearColor(0.7f, 0.7f, 0.9f, 0.0f);
+
+            gl.Enable(OpenGL.GL_DEPTH_TEST);
+            float[] global_ambient = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
+            float[] light0pos = new float[] { 1.0f, 1.0f, 1.0f, 0.0f };
+            float[] light0ambient = new float[] { 0.0f, 0.0f, 0.0f, 1.0f };
+            float[] light0diffuse = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+            float[] light0specular = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+            float[] lmodel_ambient = new float[] { 1.2f, 1.2f, 1.2f, 1.0f };
+            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
+
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, light0pos);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_AMBIENT, light0ambient);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, light0diffuse);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPECULAR, light0specular);
+
+            gl.Enable(OpenGL.GL_LIGHTING);
+            gl.Enable(OpenGL.GL_LIGHT0);
+
+            gl.ColorMaterial(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT_AND_DIFFUSE);
+            gl.Enable(OpenGL.GL_COLOR_MATERIAL);
+
+            gl.ShadeModel(OpenGL.GL_SMOOTH);
+            gl.Enable(OpenGL.GL_LINE_SMOOTH);
+
+            gl.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
+            gl.Enable(OpenGL.GL_BLEND);
+        }
+
+        public void DrawMovingGridLines(OpenGL gl, Mesh target) {
+
+            gl.Viewport(0, 0, (int)Width, (int)Height);
+            gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
+
+            gl.LoadIdentity();
+            gl.Translate(0.0f, 0.0f, -150.0f);
+
+            gl.LookAt(target.Position.x / 8, 1.0f, -50.0f, target.Position.x / 8, 1.0f, -250.0f, 0, 1, 0);
+
+            gl.Scale(0.5, 0.5, 1);
+
             //Center Line
             Line.DrawSimpleLine(gl, new Vector3(-250, 0, commonZ - 50), new Vector3(250, 0, commonZ - 50));
             //Vertical Lines To Right
@@ -269,6 +274,11 @@ namespace battlepong_game {
         }
 
         public void DrawArena(OpenGL gl) {
+
+            gl.LoadIdentity();
+            gl.Translate(0.0f, 0.0f, -150.0f);
+            gl.LookAt(0, 1.0f, -50.0f, 0, 1.0f, -250.0f, 0, 1, 0);
+
             gl.Scale(0.5, 0.5, 1); //Hack-Fix
             Player1Line.DrawSimpleLine(gl, new Vector3(player1Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player1Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
             Player2Line.DrawSimpleLine(gl, new Vector3(player2Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player2Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
@@ -280,26 +290,14 @@ namespace battlepong_game {
             player2Paddle.DrawSquare(gl);
             ball.DrawSquare(gl);
         }
+        #endregion
 
         public void OpenGLControl_OpenGLDraw(object sender, SharpGL.SceneGraph.OpenGLEventArgs args) {
             
             OpenGL gl = args.OpenGL;
+
             Render3D(gl);
-
-            gl.Viewport(0, 0, (int)Width, (int)Height);
-            gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
-
-            gl.LoadIdentity();
-            gl.Translate(0.0f, 0.0f, -150.0f);
-            gl.LookAt(ball.Position.x / 8, 1.0f, -50.0f, ball.Position.x / 8, 1.0f, -250.0f, 0, 1, 0);
-            gl.Scale(0.5, 0.5, 1);
-
-            DrawGridLines(gl);
-
-            gl.LoadIdentity();
-            gl.Translate(0.0f, 0.0f, -150.0f);
-            gl.LookAt(0, 1.0f, -50.0f, 0, 1.0f, -250.0f, 0, 1, 0);
-
+            DrawMovingGridLines(gl, ball);
             DrawArena(gl);
 
             //Start main music
@@ -318,7 +316,8 @@ namespace battlepong_game {
             #region Main
             if (isGameStarted && !isOptionMenuOpen && !isGameOver) {
                 if (!isBallPlayed) {
-                    ball.Color = new Vector4(1.0f, 1.0f, 1.0f);
+                    //ball.Color = new Vector4(1.0f, 1.0f, 1.0f);
+                    ball.Reset();
                     ball.Position = new Vector3(0, 0, commonZ);
 
                     if (didPlayer1Scored) {
@@ -337,8 +336,8 @@ namespace battlepong_game {
                 }
                 else {
                     ballTime++;
-                    //Speed up every 120 frames but stop when velocity of ball is 3.
-                    if (((ballTime % framesToCount) == 0) && (ball.Velocity.GetLength() < maxBallVelocity)) {
+                    //Speed up every framesToCount
+                    if (((ballTime % framesToCount) == 0)) {
                         ball.IncreaseSpeed(0.1f);
                     }
                     angleRandom = (float)Randomizer.Generate(-angleDeviation, angleDeviation);
@@ -366,7 +365,7 @@ namespace battlepong_game {
             if (isResetOngoing) {
                 resetCounter--;
                 if (resetCounter <= 0) {
-                    ball.Velocity *= 0;
+                    ball.Velocity *= 0;                  
                     isBallPlayed = false;
                     isResetOngoing = false;
                 }
@@ -409,34 +408,22 @@ namespace battlepong_game {
             //Test Toggle
             isTestToggled = (Keyboard.IsKeyToggled(testKey)) ? true : false;
 
-            //Player 1 Controls 
+            //Player Controls 
             if ((!isOptionMenuOpen) && (isGameStarted)) {
                 player1Paddle.topLimit = UpperBoundary.Position.y - UpperBoundary.Scale.y;
                 player1Paddle.bottomLimit = LowerBoundary.Position.y + LowerBoundary.Scale.y;
                 player1Paddle.KeyUp = playerOneUp;
                 player1Paddle.KeyDown = playerOneDown;
-                player1Paddle.maxSpeed = player1MaxSpeed;
-                player1Paddle.paddleAcceleration = player1Accel;
-                player1Paddle.frictionCoefficient = paddleFriction;
-                player1Paddle.visionDistance = visionDistance;
-                player1Paddle.EnableControl(true, ball, isPlayer1AI);            
-            } else {
-                player1Paddle.EnableControl(false, ball, isPlayer1AI);
-            }
-         
-            //Player 2 controls
-            if ((!isOptionMenuOpen) && (isGameStarted)) {
+                player1Paddle.EnableControl(true, ball, isPlayer1AI);
+
                 player2Paddle.topLimit = UpperBoundary.Position.y - UpperBoundary.Scale.y;
                 player2Paddle.bottomLimit = LowerBoundary.Position.y + LowerBoundary.Scale.y;
                 player2Paddle.KeyUp = playerTwoUp;
                 player2Paddle.KeyDown = playerTwoDown;
-                player2Paddle.maxSpeed = player2MaxSpeed;
-                player2Paddle.paddleAcceleration = player2Accel;
-                player2Paddle.frictionCoefficient = paddleFriction;
-                player2Paddle.visionDistance = visionDistance;
                 player2Paddle.EnableControl(true, ball, isPlayer2AI);
-            }
-            else {
+
+            } else {
+                player1Paddle.EnableControl(false, ball, isPlayer1AI);
                 player2Paddle.EnableControl(false, ball, isPlayer2AI);
             }
             #endregion
@@ -474,8 +461,8 @@ namespace battlepong_game {
                 wallHitSound.Play();
                 ball.Position.y = ball.TopCollision() > UpperBoundary.BottomCollision() ? ball.Position.y - 1.0f : ball.Position.y + 1.0f;
                 ball.Velocity.y = -ball.Velocity.y;
-
             }
+
             //Ball collision for Player 1
             if (ball.HasCollidedWith(player1Paddle)) { 
                 if (isSoundEnabled) {
@@ -589,13 +576,10 @@ namespace battlepong_game {
         }
         //End
 
-
         public void LogFrame() {
             long time = (GameUtils.NanoTime() - lastFrame);
             FPS = 1 / (time / 1000000000.0f);
             lastFrame = GameUtils.NanoTime();
         }
-        
-
     }
 }

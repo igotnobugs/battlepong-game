@@ -21,10 +21,10 @@ namespace battlepong_game.Models {
         public Paddle() {
             topLimit = 10.0f;
             bottomLimit = -10.0f;
-            maxSpeed = 1.0f;
-            visionDistance = 0;
-            frictionCoefficient = 0;
-            paddleAcceleration = new Vector3();
+            maxSpeed = 3.0f;
+            visionDistance = 50;
+            frictionCoefficient = 0.5f;
+            paddleAcceleration = new Vector3(0, 0.5f, 0);
         }
 
         public void EnableControl(bool enable, Mesh ball, bool isAI = false)  {

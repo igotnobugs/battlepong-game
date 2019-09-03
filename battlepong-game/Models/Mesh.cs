@@ -16,39 +16,39 @@ namespace battlepong_game.Models {
         //public bool EnabledUpdate { get; set; }
 
         public Mesh() {
-            this.Position = new Vector3();
-            this.Velocity = new Vector3();
-            this.Acceleration = new Vector3();
-            this.Rotation = 0;
+            Position = new Vector3();
+            Velocity = new Vector3();
+            Acceleration = new Vector3();
+            Rotation = 0;
         }
 
         public Mesh(Vector3 initPos) {
-            this.Position = initPos;
-            this.Velocity = new Vector3();
-            this.Acceleration = new Vector3();
-            this.Rotation = 0;
+            Position = initPos;
+            Velocity = new Vector3();
+            Acceleration = new Vector3();
+            Rotation = 0;
         }
 
         public Mesh(float x, float y, float z, int r) {
-            this.Position = new Vector3();
-            this.Velocity = new Vector3();
-            this.Acceleration = new Vector3();
-            this.Position.x = x;
-            this.Position.y = y;
-            this.Position.z = z;
-            this.Rotation = r;
+            Position = new Vector3();
+            Velocity = new Vector3();
+            Acceleration = new Vector3();
+            Position.x = x;
+            Position.y = y;
+            Position.z = z;
+            Rotation = r;
         }
 
         public void DrawSquare(OpenGL gl, float lineWidth = 1.0f) {
             gl.LineWidth(lineWidth);
             gl.Color(Color.x, Color.y, Color.z, Color.a);
             gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z);
+            gl.Vertex(Position.x - Scale.x, Position.y - Scale.y, Position.z);
+            gl.Vertex(Position.x - Scale.x, Position.y + Scale.y, Position.z);
+            gl.Vertex(Position.x + Scale.x, Position.y + Scale.y, Position.z);
+            gl.Vertex(Position.x - Scale.x, Position.y - Scale.y, Position.z);
+            gl.Vertex(Position.x + Scale.x, Position.y - Scale.y, Position.z);
+            gl.Vertex(Position.x + Scale.x, Position.y + Scale.y, Position.z);
             gl.End();
 
             if (enabledUpdate) {
@@ -60,9 +60,9 @@ namespace battlepong_game.Models {
             gl.LineWidth(lineWidth);
             gl.Color(Color.x, Color.y, Color.z, Color.a);
             gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
-            gl.Vertex(this.Position.x, this.Position.y + this.Scale.y, this.Position.z);
+            gl.Vertex(Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
+            gl.Vertex(Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z);
+            gl.Vertex(Position.x, this.Position.y + this.Scale.y, this.Position.z);
             gl.End();
         }
 
@@ -122,7 +122,7 @@ namespace battlepong_game.Models {
                 double angle = 2.0f * Math.PI * ii / Resolution;
                 double x = Radius * Math.Cos(angle);
                 double y = Radius * Math.Sin(angle);
-                gl.Vertex(x + this.Position.x, y + this.Position.y, this.Position.z);
+                gl.Vertex(x + Position.x, y + Position.y, Position.z);
             }
             gl.End();
             UpdateMotion();
@@ -158,14 +158,14 @@ namespace battlepong_game.Models {
                 double angle = 2.0f * Math.PI * ii / Resolution;
                 double x = Radius * Math.Cos(angle);
                 double y = Radius * Math.Sin(angle);
-                gl.Vertex(x + this.Position.x, y + this.Position.y, this.Position.z);
+                gl.Vertex(x + Position.x, y + Position.y, Position.z);
             }
             gl.End();
 
             //Circle Center
             gl.PushMatrix();
-            gl.Translate(this.Position.x, this.Position.y, this.Position.z);
-            gl.Rotate(0, this.Rotation, 0);
+            gl.Translate(Position.x, Position.y, Position.z);
+            gl.Rotate(0, Rotation, 0);
             gl.Begin(OpenGL.GL_LINE_LOOP);
             for (int ii = 0; ii < Resolution; ii++) {
                 double angle = 2.0f * Math.PI * ii / Resolution;
@@ -179,8 +179,8 @@ namespace battlepong_game.Models {
 
             //Circle perpendicular to center
             gl.PushMatrix();
-            gl.Translate(this.Position.x, this.Position.y, this.Position.z);
-            gl.Rotate(0, this.Rotation - 90, 90);
+            gl.Translate(Position.x, Position.y, Position.z);
+            gl.Rotate(0, Rotation - 90, 90);
             gl.Begin(OpenGL.GL_LINE_LOOP);
             for (int ii = 0; ii < Resolution; ii++) {
                 double angle = 2.0f * Math.PI * ii / Resolution;
@@ -193,8 +193,8 @@ namespace battlepong_game.Models {
             gl.PopMatrix();
 
             gl.PushMatrix();
-            gl.Translate(this.Position.x, this.Position.y, this.Position.z);
-            gl.Rotate(0, this.Rotation - 45, 90);
+            gl.Translate(Position.x, Position.y, Position.z);
+            gl.Rotate(0, Rotation - 45, 90);
             gl.Begin(OpenGL.GL_LINE_LOOP);
             for (int ii = 0; ii < Resolution; ii++) {
                 double angle = 2.0f * Math.PI * ii / Resolution;
@@ -207,8 +207,8 @@ namespace battlepong_game.Models {
             gl.PopMatrix();
 
             gl.PushMatrix();
-            gl.Translate(this.Position.x, this.Position.y, this.Position.z);
-            gl.Rotate(0, this.Rotation, 90);
+            gl.Translate(Position.x, Position.y, Position.z);
+            gl.Rotate(0, Rotation, 90);
             gl.Begin(OpenGL.GL_LINE_LOOP);
             for (int ii = 0; ii < Resolution; ii++) {
                 double angle = 2.0f * Math.PI * ii / Resolution;
@@ -221,8 +221,8 @@ namespace battlepong_game.Models {
             gl.PopMatrix();
 
             gl.PushMatrix();
-            gl.Translate(this.Position.x, this.Position.y, this.Position.z);
-            gl.Rotate(0, this.Rotation + 45, 90);
+            gl.Translate(Position.x, Position.y, Position.z);
+            gl.Rotate(0, Rotation + 45, 90);
             gl.Begin(OpenGL.GL_LINE_LOOP);
             for (int ii = 0; ii < Resolution; ii++) {
                 double angle = 2.0f * Math.PI * ii / Resolution;
