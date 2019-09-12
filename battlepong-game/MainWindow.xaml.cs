@@ -8,6 +8,8 @@ using System.Media;
 using System.Windows;
 using System.Windows.Input;
 using battlepong_game.Settings;
+using SharpGL.SceneGraph.Primitives;
+using SharpGL.SceneGraph;
 
 namespace battlepong_game {
 
@@ -41,7 +43,7 @@ namespace battlepong_game {
         }
 
         //The common z coordinate for most meshes
-        private static float commonZ = 50.0f;
+        private static float commonZ = 0.0f;
 
         #region Movable Meshes
         private Paddle player1Paddle = new Paddle() {
@@ -211,32 +213,33 @@ namespace battlepong_game {
         #region GL Draw Functions
         private void Render3D(OpenGL gl)
         {
-            //OpenGL gl = args.OpenGL;
             //Set Background Color
             //gl.ClearColor(0.7f, 0.7f, 0.9f, 0.0f);
 
             gl.Enable(OpenGL.GL_DEPTH_TEST);
+
             float[] global_ambient = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
             float[] light0pos = new float[] { 1.0f, 1.0f, 1.0f, 0.0f };
             float[] light0ambient = new float[] { 0.0f, 0.0f, 0.0f, 1.0f };
             float[] light0diffuse = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
             float[] light0specular = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+
             float[] lmodel_ambient = new float[] { 1.2f, 1.2f, 1.2f, 1.0f };
             gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
-            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
 
+            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, light0pos);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_AMBIENT, light0ambient);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, light0diffuse);
-            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPECULAR, light0specular);
-
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPECULAR, light0specular); 
             gl.Enable(OpenGL.GL_LIGHTING);
             gl.Enable(OpenGL.GL_LIGHT0);
 
+            gl.ShadeModel(OpenGL.GL_SMOOTH);
+
             gl.ColorMaterial(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT_AND_DIFFUSE);
             gl.Enable(OpenGL.GL_COLOR_MATERIAL);
-
-            gl.ShadeModel(OpenGL.GL_SMOOTH);
+           
             gl.Enable(OpenGL.GL_LINE_SMOOTH);
 
             gl.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
@@ -249,37 +252,35 @@ namespace battlepong_game {
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
             gl.LoadIdentity();
-            gl.Translate(0.0f, 0.0f, -150.0f);
+            //gl.Translate(0.0f, 0.0f, 0.0f);
 
-            gl.LookAt(target.Position.x / 8, 1.0f, -50.0f, target.Position.x / 8, 1.0f, -250.0f, 0, 1, 0);
-
-            gl.Scale(0.5, 0.5, 1);
+            gl.LookAt(target.Position.x / 8, 60.0f, 10.0f, target.Position.x / 8, -50.0f, -250.0f, 0, 1, 0);
 
             //Center Line
-            Line.DrawSimpleLine(gl, new Vector3(-250, 0, commonZ - 50), new Vector3(250, 0, commonZ - 50));
+            Line.DrawSimpleLine(gl, new Vector3(-550, 0, -200), new Vector3(550, 0, -200));
+            //Bottom Line
+            Line.DrawSimpleLine(gl, new Vector3(-250, 0, 0), new Vector3(250, 0, 0));
             //Vertical Lines To Right
             for (int i = 0; i < 25; i++)
             {
-                Line.DrawSimpleLine(gl, new Vector3(10 * i, -30, commonZ), new Vector3(10 * i, 0, commonZ - 50));
+                Line.DrawSimpleLine(gl, new Vector3(20 * i, 0, 0), new Vector3(20 * i, 0, -200));
             }
             //Vertical Lines to Left
             for (int i = 1; i < 25; i++)
             {
-                Line.DrawSimpleLine(gl, new Vector3(-10 * i, -30, commonZ), new Vector3(-10 * i, 0, commonZ - 50));
+                Line.DrawSimpleLine(gl, new Vector3(-20 * i, -0, 0), new Vector3(-20 * i, 0, -200));
             }
-            for (int i = 0; i < 13; i++)
+            //Lines Top to Bottom
+            for (int i = 0; i < 10; i++)
             {
-                Line.DrawSimpleLine(gl, new Vector3(-250, 0 - (3 * i), commonZ - 50 + (3 * i)), new Vector3(250, 0 - (3 * i), commonZ - 50 + (3 * i)));
+                Line.DrawSimpleLine(gl, new Vector3(-550, 0 - (3 * i), -200 + (20 * i)), new Vector3(550, 0 - (3 * i), -200 + (20 * i)));
             }
         }
 
         public void DrawArena(OpenGL gl) {
 
             gl.LoadIdentity();
-            gl.Translate(0.0f, 0.0f, -150.0f);
-            gl.LookAt(0, 1.0f, -50.0f, 0, 1.0f, -250.0f, 0, 1, 0);
 
-            gl.Scale(0.5, 0.5, 1); //Hack-Fix
             Player1Line.DrawSimpleLine(gl, new Vector3(player1Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player1Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
             Player2Line.DrawSimpleLine(gl, new Vector3(player2Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player2Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
 
@@ -296,8 +297,12 @@ namespace battlepong_game {
             
             OpenGL gl = args.OpenGL;
 
+            // Clear The Screen And The Depth Buffer
+            gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
+
             Render3D(gl);
             DrawMovingGridLines(gl, ball);
+
             DrawArena(gl);
 
             //Start main music
@@ -580,6 +585,53 @@ namespace battlepong_game {
             long time = (GameUtils.NanoTime() - lastFrame);
             FPS = 1 / (time / 1000000000.0f);
             lastFrame = GameUtils.NanoTime();
+        }
+
+        private void OpenGLControl_OpenGLInitialized(object sender, SharpGL.SceneGraph.OpenGLEventArgs args) {
+            OpenGL gl = args.OpenGL;
+
+            gl.Enable(OpenGL.GL_DEPTH_TEST);
+
+            float[] global_ambient = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
+            float[] light0pos = new float[] { 0.0f, 5.0f, 10.0f, 1.0f };
+            float[] light0ambient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
+            float[] light0diffuse = new float[] { 0.3f, 0.3f, 0.3f, 1.0f };
+            float[] light0specular = new float[] { 0.8f, 0.8f, 0.8f, 1.0f };
+
+            float[] lmodel_ambient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
+            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+
+            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, light0pos);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_AMBIENT, light0ambient);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, light0diffuse);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPECULAR, light0specular);
+            gl.Enable(OpenGL.GL_LIGHTING);
+            gl.Enable(OpenGL.GL_LIGHT0);
+
+            gl.ShadeModel(OpenGL.GL_SMOOTH);
+        }
+
+        private void OpenGLControl_Resized(object sender, OpenGLEventArgs args) {
+            //  TODO: Set the projection matrix here.
+
+            //  Get the OpenGL object.
+            OpenGL gl = args.OpenGL;
+
+            //  Set the projection matrix.
+            gl.MatrixMode(OpenGL.GL_PROJECTION);
+
+            //  Load the identity.
+            gl.LoadIdentity();
+
+            //  Create a perspective transformation.
+            gl.Perspective(90.0f, (double)Width / (double)Height, 0.01, 500.0);
+
+            //  Use the 'look at' helper function to position and aim the camera.
+            gl.LookAt(0, 1.0f, 45.0f, 0, 1.0f, -250.0f, 0, 1, 0);
+
+            //  Set the modelview matrix.
+            gl.MatrixMode(OpenGL.GL_MODELVIEW);
         }
     }
 }

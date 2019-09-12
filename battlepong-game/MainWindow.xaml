@@ -8,9 +8,12 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="700" Width="1000">
     <Grid>
-		<sharpGL:OpenGLControl
+        <sharpGL:OpenGLControl
             OpenGLDraw="OpenGLControl_OpenGLDraw"
+            OpenGLInitialized="OpenGLControl_OpenGLInitialized"
+            Resized="OpenGLControl_Resized"
 			MouseMove="OnMouseMove"
-            RenderContextType="FBO" />
-	</Grid>
+            RenderContextType="FBO" 
+            DrawFPS="True" />
+    </Grid>
 </Window>
