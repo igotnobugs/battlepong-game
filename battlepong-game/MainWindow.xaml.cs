@@ -92,25 +92,25 @@ namespace battlepong_game {
             Color = new Vector4(0.5f, 0.5f, 0.5f)
         };
         private Mesh StartMenu = new Mesh() {
-            Position = new Vector3(0, 0, commonZ + 50.0f),
-            Scale = new Vector3(20, 10, 5),
+            Position = new Vector3(0, 0, commonZ),
+            Scale = new Vector3(40, 20, 0),
             Color = new Vector4(0.1f, 0.1f, 0.1f, 0.9f)
         };
         private Mesh OptionMenu = new Mesh() {
-            Position = new Vector3(0, 0, commonZ + 50.0f),
-            Scale = new Vector3(20, 10, 5),
+            Position = new Vector3(0, 0, commonZ),
+            Scale = new Vector3(40, 20, 0),
             Color = new Vector4(0.2f, 0.2f, 0.2f, 0.7f)
         };
         private Mesh ResultMenu = new Mesh() {
-            Position = new Vector3(0, 0, commonZ + 50.0f),
-            Scale = new Vector3(20, 10, 0),
+            Position = new Vector3(0, 0, commonZ),
+            Scale = new Vector3(40, 20, 0),
             Color = new Vector4(0.2f, 0.2f, 0.2f, 0.7f)
         };
         private Mesh Line = new Mesh() {
             Color = new Vector4(0.6f, 0.1f, 0.6f, 0.6f)
         };
         private Mesh Moon = new Mesh() {
-            Position = new Vector3(0, 5, commonZ - 50.0f),
+            Position = new Vector3(0, 5, commonZ),
             Radius = 10,
             Color = new Vector4(0.6f, 0.1f, 0.6f, 0.4f)
         };
@@ -119,6 +119,12 @@ namespace battlepong_game {
             Scale = new Vector3(20, 50, 0),
             Color = new Vector4(0.0f, 0.0f, 0.0f)
 
+        };
+
+        private Mesh Pyramid = new Mesh() {
+            Position = new Vector3(-200, -50, commonZ - 200 ),
+            Scale = new Vector3(40, 60, 30),
+            Color = new Vector4(0.6f, 0.1f, 0.6f, 1.0f)
         };
 
         #endregion
@@ -256,6 +262,8 @@ namespace battlepong_game {
 
             gl.LookAt(target.Position.x / 8, 60.0f, 10.0f, target.Position.x / 8, -50.0f, -250.0f, 0, 1, 0);
 
+
+
             //Center Line
             Line.DrawSimpleLine(gl, new Vector3(-550, 0, -200), new Vector3(550, 0, -200));
             //Bottom Line
@@ -275,10 +283,14 @@ namespace battlepong_game {
             {
                 Line.DrawSimpleLine(gl, new Vector3(-550, 0 - (3 * i), -200 + (20 * i)), new Vector3(550, 0 - (3 * i), -200 + (20 * i)));
             }
+
+            //Draw Pyramid
+            for (int i = 0; i < 20; i++) {
+                Pyramid.DrawPyramid(gl, new Vector3(-300 + (i * (50 + Pyramid.Scale.z)), 0, -200));
+            }
         }
 
         public void DrawArena(OpenGL gl) {
-
             gl.LoadIdentity();
 
             Player1Line.DrawSimpleLine(gl, new Vector3(player1Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player1Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
@@ -512,7 +524,6 @@ namespace battlepong_game {
             //Start Screen
             if (!isGameStarted) {
                 gl.LoadIdentity();
-                gl.Translate(0.0f, 0.0f, -150.0f);
               
                 StartMenu.DrawSquare(gl);
                 gl.DrawText((int)Width / 2 - ((int)(menuSize[0] * cons) * menuText[0].Length), (int)Height / 2 + 60, 0.5f, 1.0f, 0.5f, "Courier New", menuSize[0], menuText[0]);

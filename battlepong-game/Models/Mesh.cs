@@ -66,6 +66,37 @@ namespace battlepong_game.Models {
             gl.End();
         }
 
+        public void DrawPyramid(OpenGL gl, Vector3 NewPosiition) {
+
+
+            //POLYGON
+            gl.Color(Color.x, Color.y, Color.z);
+            gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
+
+            //gl.Begin(OpenGL.GL_LINE_STRIP);
+            //FRONT FACE
+            gl.Vertex(NewPosiition.x, NewPosiition.y + Scale.y, NewPosiition.z);
+            gl.Vertex(NewPosiition.x - (Scale.x / 2), NewPosiition.y, NewPosiition.z + (Scale.z / 2));
+            gl.Vertex(NewPosiition.x + (Scale.x / 2), NewPosiition.y, NewPosiition.z + (Scale.z / 2));
+            //LEFT FACE
+            gl.Vertex(NewPosiition.x, NewPosiition.y + Scale.y, NewPosiition.z);
+            gl.Vertex(NewPosiition.x - (Scale.x / 2), NewPosiition.y, NewPosiition.z - (Scale.z / 2));
+            //BOTTOM FACE ????
+            gl.Vertex(NewPosiition.x - (Scale.x / 2), NewPosiition.y, NewPosiition.z + (Scale.z / 2));
+            gl.Vertex(NewPosiition.x + (Scale.x / 2), NewPosiition.y, NewPosiition.z - (Scale.z / 2));
+            gl.Vertex(NewPosiition.x + (Scale.x / 2), NewPosiition.y, NewPosiition.z + (Scale.z / 2));
+
+            gl.Vertex(NewPosiition.x, NewPosiition.y + Scale.y, NewPosiition.z);
+            gl.Vertex(NewPosiition.x + (Scale.x / 2), NewPosiition.y, NewPosiition.z - (Scale.z / 2));
+            gl.Vertex(NewPosiition.x - (Scale.x / 2), NewPosiition.y, NewPosiition.z - (Scale.z / 2));
+
+            gl.End();
+
+            if (enabledUpdate) {
+                UpdateMotion();
+            }
+        }
+
         public void DrawCube(OpenGL gl) {
             //POLYGON
             gl.Color(Color.x, Color.y, Color.z);
