@@ -6,6 +6,9 @@ namespace battlepong_game.Utilities {
 
     public class GameUtils {
 
+        public long lastFrame = GameUtils.NanoTime();
+        public float FPS = 0;
+
         public static float Constrain(float val, float min, float max) {
             if (val <= min) return min;
             else if (val >= max) return max;
@@ -39,6 +42,12 @@ namespace battlepong_game.Utilities {
             nano /= TimeSpan.TicksPerMillisecond;
             nano *= 100L;
             return nano;
+        }
+
+        public void LogFrame() {
+            long time = (GameUtils.NanoTime() - lastFrame);
+            FPS = 1 / (time / 1000000000.0f);
+            lastFrame = GameUtils.NanoTime();
         }
     }
 }

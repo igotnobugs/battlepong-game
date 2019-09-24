@@ -8,6 +8,8 @@ using SharpGL;
 namespace battlepong_game.Models {
     public partial class Ball : Mesh {
 
+        public bool isBallPlayed = false;
+
         public Vector4 defaultColor;
 
         public List<Mesh> ballExplosions = new List<Mesh>();
@@ -40,7 +42,7 @@ namespace battlepong_game.Models {
             }
         }
 
-        public void AddExplosion(OpenGL gl, float maxVerticalBorder, Mesh UpperBoundary, bool isOptionMenuOpen) {
+        public void AddExplosion(OpenGL gl, float maxVerticalBorder, Mesh UpperBoundary, Mesh LowerBoundary, bool isOptionMenuOpen) {
             Mesh ballExplosion = new Mesh() {
                 Position = Position - Velocity - new Vector3(0, 0, 0.1f),
                 Radius = 1.0f,
@@ -48,8 +50,7 @@ namespace battlepong_game.Models {
             };
 
             //Ball hitting top or bottom
-            if ((Position.y + Scale.x > maxVerticalBorder - UpperBoundary.Scale.y) ||
-                (Position.y - Scale.x < maxVerticalBorder * -1 + UpperBoundary.Scale.y)) {
+            if (HasCollidedWith(UpperBoundary) || (HasCollidedWith(LowerBoundary))) {
                 ballExplosions.Add(ballExplosion);
             }
 

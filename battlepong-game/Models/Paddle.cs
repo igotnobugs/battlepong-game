@@ -14,11 +14,12 @@ namespace battlepong_game.Models {
         public float visionDistance;
         public float frictionCoefficient;
         public Vector3 paddleAcceleration;
-
+        public int player; // 1 - first player, 2 - second player
         public Key KeyUp;
         public Key KeyDown;
 
         public Paddle() {
+            player = 1;
             topLimit = 10.0f;
             bottomLimit = -10.0f;
             maxSpeed = 3.0f;
