@@ -12,6 +12,7 @@ namespace battlepong_game.Models {
         public Vector4 Color = new Vector4(0.5f, 0.5f, 0.5f, 0.5f);
         public float Radius = 0.5f;
         public bool enabledCollision = false;
+        public Vector4 Rotation = new Vector4(0, 0, 0, 0);
 
         //public bool EnabledUpdate { get; set; }
 
@@ -19,14 +20,14 @@ namespace battlepong_game.Models {
             Position = new Vector3();
             Velocity = new Vector3();
             Acceleration = new Vector3();
-            Rotation = 0;
+            Rotation = new Vector4();
         }
 
         public Mesh(Vector3 initPos) {
             Position = initPos;
             Velocity = new Vector3();
             Acceleration = new Vector3();
-            Rotation = 0;
+            Rotation = new Vector4();
         }
 
         public Mesh(float x, float y, float z, int r) {
@@ -36,21 +37,26 @@ namespace battlepong_game.Models {
             Position.x = x;
             Position.y = y;
             Position.z = z;
-            Rotation = r;
         }
 
         public void DrawSquare(OpenGL gl, float lineWidth = 1.0f) {
+            gl.PushMatrix();
+
             gl.LineWidth(lineWidth);
             gl.Color(Color.x, Color.y, Color.z, Color.a);
+            gl.Translate(Position.x, Position.y, Position.z);
+            gl.Rotate(Rotation.x, Rotation.y, Rotation.z, Rotation.a);
+
             gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
-            gl.Vertex(Position.x - Scale.x, Position.y - Scale.y, Position.z);
-            gl.Vertex(Position.x - Scale.x, Position.y + Scale.y, Position.z);
-            gl.Vertex(Position.x + Scale.x, Position.y + Scale.y, Position.z);
-            gl.Vertex(Position.x - Scale.x, Position.y - Scale.y, Position.z);
-            gl.Vertex(Position.x + Scale.x, Position.y - Scale.y, Position.z);
-            gl.Vertex(Position.x + Scale.x, Position.y + Scale.y, Position.z);
+            gl.Vertex(-Scale.x, -Scale.y, 0);
+            gl.Vertex(-Scale.x, Scale.y, 0);
+            gl.Vertex(Scale.x, Scale.y, 0);
+            gl.Vertex(-Scale.x, -Scale.y, 0);
+            gl.Vertex(Scale.x, -Scale.y, 0);
+            gl.Vertex(Scale.x, Scale.y, 0);
             gl.End();
 
+            gl.PopMatrix();
             if (enabledUpdate) {
                 UpdateMotion();
             }
@@ -72,7 +78,6 @@ namespace battlepong_game.Models {
             //POLYGON
             gl.Color(Color.x, Color.y, Color.z);
             gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
-
             //gl.Begin(OpenGL.GL_LINE_STRIP);
             //FRONT FACE
             gl.Vertex(NewPosiition.x, NewPosiition.y + Scale.y, NewPosiition.z);
@@ -98,45 +103,47 @@ namespace battlepong_game.Models {
         }
 
         public void DrawCube(OpenGL gl) {
+            gl.PushMatrix();
             //POLYGON
             gl.Color(Color.x, Color.y, Color.z);
             gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
+            gl.Translate(Position.x, Position.y, Position.z);
             //Front face
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z + this.Scale.z);
+            gl.Vertex(-Scale.x,  +Scale.y,  +Scale.z);
+            gl.Vertex(-Scale.x,  -Scale.y,  +Scale.z);
+            gl.Vertex(+Scale.x,  +Scale.y,  +Scale.z);
+            gl.Vertex(+Scale.x,  -Scale.y,  +Scale.z);
 
             //Right face
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z - this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z - this.Scale.z);
+            gl.Vertex(+Scale.x,  +Scale.y,  -Scale.z);
+            gl.Vertex(+Scale.x,  -Scale.y,  -Scale.z);
 
             //Back face
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z - this.Scale.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z - this.Scale.z);
+            gl.Vertex(-Scale.x,  +Scale.y,  -Scale.z);
+            gl.Vertex(-Scale.x,  -Scale.y,  -Scale.z);
             //Left face
 
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z + this.Scale.z);
+            gl.Vertex(-Scale.x,  +Scale.y,  +Scale.z);
+            gl.Vertex(-Scale.x,  -Scale.y,  +Scale.z);
             gl.End();
 
             gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
             //Top face      
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z + this.Scale.z);
+            gl.Vertex(-Scale.x,  +Scale.y,  +Scale.z);
+            gl.Vertex(+Scale.x,  +Scale.y,  +Scale.z);
             //gl.Color(0, 0, 0);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y + this.Scale.y, this.Position.z - this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y + this.Scale.y, this.Position.z - this.Scale.z);
+            gl.Vertex(-Scale.x,  +Scale.y,  -Scale.z);
+            gl.Vertex(+Scale.x,  +Scale.y,  -Scale.z);
             gl.End();
 
             gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
             //Bottom face
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z + this.Scale.z);
-            gl.Vertex(this.Position.x - this.Scale.x, this.Position.y - this.Scale.y, this.Position.z - this.Scale.z);
-            gl.Vertex(this.Position.x + this.Scale.x, this.Position.y - this.Scale.y, this.Position.z - this.Scale.z);
+            gl.Vertex(-Scale.x,  -Scale.y,  +Scale.z);
+            gl.Vertex(+Scale.x,  -Scale.y,  +Scale.z);
+            gl.Vertex(-Scale.x,  -Scale.y,  -Scale.z);
+            gl.Vertex(+Scale.x,  -Scale.y,  -Scale.z);
             gl.End();
-
+            gl.PopMatrix();
             if (enabledUpdate) {
                 UpdateMotion();
             }
@@ -176,107 +183,6 @@ namespace battlepong_game.Models {
             gl.Vertex(origin.x, origin.y, origin.z);
             gl.Vertex(target.x, target.y, target.z);
             gl.End();
-        }
-
-        public void DrawBasketBall(OpenGL gl, float lineWidth = 1.0f, int Resolution = 50) {
-            gl.LineWidth(lineWidth);
-            //gl.Color(Color.x, Color.y, Color.z);
-            Resolution = (int)GameUtils.Constrain(Resolution, 10, 100);
-
-            //Main Circle
-            gl.Begin(OpenGL.GL_LINE_LOOP);
-            for (int ii = 0; ii < Resolution; ii++) {
-                double angle = 2.0f * Math.PI * ii / Resolution;
-                double x = Radius * Math.Cos(angle);
-                double y = Radius * Math.Sin(angle);
-                gl.Vertex(x + Position.x, y + Position.y, Position.z);
-            }
-            gl.End();
-
-            //Circle Center
-            gl.PushMatrix();
-            gl.Translate(Position.x, Position.y, Position.z);
-            gl.Rotate(0, Rotation, 0);
-            gl.Begin(OpenGL.GL_LINE_LOOP);
-            for (int ii = 0; ii < Resolution; ii++) {
-                double angle = 2.0f * Math.PI * ii / Resolution;
-                double x = Radius * Math.Sin(angle);
-                double z = Radius * Math.Cos(angle);
-
-                gl.Vertex(x, 0, z);
-            }
-            gl.End();
-            gl.PopMatrix();
-
-            //Circle perpendicular to center
-            gl.PushMatrix();
-            gl.Translate(Position.x, Position.y, Position.z);
-            gl.Rotate(0, Rotation - 90, 90);
-            gl.Begin(OpenGL.GL_LINE_LOOP);
-            for (int ii = 0; ii < Resolution; ii++) {
-                double angle = 2.0f * Math.PI * ii / Resolution;
-                double x = Radius * Math.Sin(angle);
-                double z = Radius * Math.Cos(angle);
-
-                gl.Vertex(x, 0, z);
-            }
-            gl.End();
-            gl.PopMatrix();
-
-            gl.PushMatrix();
-            gl.Translate(Position.x, Position.y, Position.z);
-            gl.Rotate(0, Rotation - 45, 90);
-            gl.Begin(OpenGL.GL_LINE_LOOP);
-            for (int ii = 0; ii < Resolution; ii++) {
-                double angle = 2.0f * Math.PI * ii / Resolution;
-                double x = Radius * Math.Sin(angle);
-                double z = Radius * Math.Cos(angle);
-
-                gl.Vertex(x, 0, z);
-            }
-            gl.End();
-            gl.PopMatrix();
-
-            gl.PushMatrix();
-            gl.Translate(Position.x, Position.y, Position.z);
-            gl.Rotate(0, Rotation, 90);
-            gl.Begin(OpenGL.GL_LINE_LOOP);
-            for (int ii = 0; ii < Resolution; ii++) {
-                double angle = 2.0f * Math.PI * ii / Resolution;
-                double x = Radius * Math.Sin(angle);
-                double z = Radius * Math.Cos(angle);
-
-                gl.Vertex(x, 0, z);
-            }
-            gl.End();
-            gl.PopMatrix();
-
-            gl.PushMatrix();
-            gl.Translate(Position.x, Position.y, Position.z);
-            gl.Rotate(0, Rotation + 45, 90);
-            gl.Begin(OpenGL.GL_LINE_LOOP);
-            for (int ii = 0; ii < Resolution; ii++) {
-                double angle = 2.0f * Math.PI * ii / Resolution;
-                double x = Radius * Math.Sin(angle);
-                double z = Radius * Math.Cos(angle);
-                gl.Vertex(x, 0, z);
-            }
-            gl.End();
-            gl.PopMatrix();
-
-            //Draw Right Curve
-            /*
-            gl.Color(0.0f, 0.0f, 0.0f);
-            gl.Begin(OpenGL.GL_POLYGON);
-            for (int ii = 0; ii < Resolution; ii++) {
-                double angle = 2.0f * Math.PI * ii / Resolution;
-                double x = Radius * Math.Cos(angle);
-                double y = Radius * Math.Sin(angle);
-                gl.Vertex(x + this.Position.x, y + this.Position.y, this.Position.z);
-            }
-            gl.End();
-            */
-            UpdateMotion();
         }
 
         private void UpdateMotion() {

@@ -293,6 +293,7 @@ namespace battlepong_game {
             ball.DrawSquare(gl);
         }
         #endregion
+
         public bool initialized = false;
 
         public void OpenGLControl_OpenGLDraw(object sender, SharpGL.SceneGraph.OpenGLEventArgs args) {
@@ -333,7 +334,6 @@ namespace battlepong_game {
             }
 
 
-
             //Start 
             #region Main
             if (isGameStarted && !isOptionMenuOpen && !isGameOver) {
@@ -357,6 +357,8 @@ namespace battlepong_game {
                     resetCounter = 30;
                 }
                 else {
+
+                    player1Paddle.Rotation = new Vector4(45, 0, 0, 1);
                     //Ball is moving
                     ballTime++;
                     //Speed up every framesToCount

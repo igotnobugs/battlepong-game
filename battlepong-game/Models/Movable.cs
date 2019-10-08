@@ -9,7 +9,7 @@ namespace battlepong_game.Models {
         public Vector3 Velocity;
         public Vector3 Acceleration;
         public Vector3 Friction;
-        public float Rotation;
+        //public float Rotation;
         public float MaxVelocity;
         public float Mass = 1;
 
