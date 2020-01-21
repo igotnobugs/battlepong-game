@@ -13,6 +13,9 @@ using SharpGL.SceneGraph;
 
 namespace battlepong_game {
 
+    //Movable/Collision/AI -> Mesh -> Paddle
+    //                             -> Ball
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -42,24 +45,21 @@ namespace battlepong_game {
             //Console.WriteLine((mousePos.x) + " " + (mousePos.y));
         }
 
-        //The common z coordinate for most meshes
-        private static float commonZ = 0.0f;
-
         #region Movable Meshes
-        private Paddle player1Paddle = new Paddle() {
-            Position = new Vector3(-50, 0, commonZ),
+        private Paddle p1Paddle = new Paddle() {
+            Position = new Vector3(-50, 0, 0),
             Scale = new Vector3(1.0f, 6, 1),
             Mass = 1.0f,
             Color = new Vector4(1.0f, 0.3f, 0.3f)
         };
-        private Paddle player2Paddle = new Paddle() {
-            Position = new Vector3(50, 0, commonZ),
+        private Paddle p2Paddle = new Paddle() {
+            Position = new Vector3(50, 0, 0),
             Scale = new Vector3(1.0f, 6, 1),
             Mass = 1.0f,
             Color = new Vector4(0.3f, 0.3f, 1.0f)
         };
         private Ball ball = new Ball() {
-            Position = new Vector3(0, 0, commonZ),
+            Position = new Vector3(0, 0, 0),
             Scale = new Vector3(1, 1, 1),
             Color = new Vector4(1.0f, 1.0f, 1.0f, 0.0f)
         };
@@ -72,12 +72,12 @@ namespace battlepong_game {
             Color = new Vector4(0.5f, 1.0f, 0.5f)
         };
         private Mesh UpperBoundary = new Mesh() {
-            Position = new Vector3(0, 30, commonZ),
+            Position = new Vector3(0, 30, 0),
             Scale = new Vector3(70, 0.5f, 1),
             Color = new Vector4(1.0f, 1.0f, 1.0f)
         };
         private Mesh LowerBoundary = new Mesh() {
-            Position = new Vector3(0, -30, commonZ),
+            Position = new Vector3(0, -30, 0),
             Scale = new Vector3(70, 0.5f, 1),
             Color = new Vector4(1.0f, 1.0f, 1.0f)
         };
@@ -91,17 +91,17 @@ namespace battlepong_game {
             Color = new Vector4(0.5f, 0.5f, 0.5f)
         };
         private Mesh StartMenu = new Mesh() {
-            Position = new Vector3(0, 0, commonZ),
+            Position = new Vector3(0, 0, 0),
             Scale = new Vector3(40, 20, 0),
             Color = new Vector4(0.1f, 0.1f, 0.1f, 0.9f)
         };
         private Mesh OptionMenu = new Mesh() {
-            Position = new Vector3(0, 0, commonZ),
+            Position = new Vector3(0, 0, 0),
             Scale = new Vector3(40, 20, 0),
             Color = new Vector4(0.2f, 0.2f, 0.2f, 0.7f)
         };
         private Mesh ResultMenu = new Mesh() {
-            Position = new Vector3(0, 0, commonZ),
+            Position = new Vector3(0, 0, 0),
             Scale = new Vector3(40, 20, 0),
             Color = new Vector4(0.2f, 0.2f, 0.2f, 0.7f)
         };
@@ -109,23 +109,20 @@ namespace battlepong_game {
             Color = new Vector4(0.6f, 0.1f, 0.6f, 0.6f)
         };
         private Mesh Moon = new Mesh() {
-            Position = new Vector3(0, 5, commonZ),
+            Position = new Vector3(0, 5, 0),
             Radius = 10,
             Color = new Vector4(0.6f, 0.1f, 0.6f, 0.4f)
         };
         private Mesh Ground = new Mesh() {
-            Position = new Vector3(0, -50, commonZ - 40.0f),
+            Position = new Vector3(0, -50, 0 - 40.0f),
             Scale = new Vector3(20, 50, 0),
             Color = new Vector4(0.0f, 0.0f, 0.0f)
-
         };
-
         private Mesh Pyramid = new Mesh() {
-            Position = new Vector3(-200, -50, commonZ - 200),
+            Position = new Vector3(-200, -50, 0 - 200),
             Scale = new Vector3(40, 60, 30),
             Color = new Vector4(0.6f, 0.1f, 0.6f, 1.0f)
         };
-
         #endregion
 
         #region Variables
@@ -140,15 +137,14 @@ namespace battlepong_game {
         private Key playerTwoDown = Key.Down;
         private Key playerOneQuitKey = Key.Escape;
         private Key playerTwoQuitKey = Key.End;
-        private Key pauseKey = Key.P; //opens option menu
-        private Key testKey = Key.T;
-        private Key startKey = Key.Enter;
         private Key player1Enable = Key.LeftShift;
         private Key player2Enable = Key.RightShift;
+        private Key pauseKey = Key.P;
+        private Key testKey = Key.T;
+        private Key startKey = Key.Enter;
         private Key restart = Key.R;
 
         //GameSettings
-        //private float maxHorizontalBorder = 50.0f;
         public float maxVerticalBorder = 30.0f;
         public bool isSoundEnabled = true;
 
@@ -164,36 +160,22 @@ namespace battlepong_game {
         //Game Related Variables
         public bool isStartMusPlayed = false;
         public bool isGameStarted = false;
-        public bool isBallPlayed = false;
         public bool isScoredAlready = false;
         public bool isOptionMenuOpen = false;
         public bool isTestToggled = false;
         public bool isResetOngoing = false;
-        public bool isRestarting = false;
         public bool isGameOver = false;
         public float angleRandom;
         public int resetCounter = 30;
         public int player1Score = 0;
         public int player2Score = 0;
         public int winningScore = 5;
-        public float ballTime = 0;
         public float scoringLine = 10.0f;
-        public bool didPlayer1Scored = false;
-        public int framesToCount = 120;
-        //public float maxBallVelocity = 3.0f;
+        public int didPlayer1Scored = -1;
         public float angleDeviation = 5.0f;
         public Vector4 lighterColor = new Vector4(0.1f, 0.1f, 0.1f);
-        public List<Mesh> ballTrails = new List<Mesh>();
-        public List<Mesh> ballExplosions = new List<Mesh>();
-        public List<Mesh> landLines = new List<Mesh>();
 
-        //AI CODE
-        public bool isPlayer1AI = false;
-        public bool isPlayer2AI = true;
-        public bool willReturnToCenter = true;
-        //private bool willPredictTrajectory = false;
-
-        //String Variables
+        //String/Menu Variables
         public float cons = 0.375f; //Monospace Constant to be able to get the length of string
         public string[] menuText = { "C# PONG", "Enter to Start", "Hold Right Shift to toggle Player 2", "Player 2 Enabled", "Player 2 Disabled" };
         public float[] menuSize = { 50.0f, 30.0f, 20.0f, 15.0f, 15.0f };
@@ -204,14 +186,12 @@ namespace battlepong_game {
         public string[] resultText = { "Game Over", "Player 1 Won", "Player 2 Won", "Press R to Restart" };
         public float[] resultSize = { 30.0f, 50.0f, 50.0f, 20.0f };
         public float move = -1;
-
         #endregion
 
         public Controls Control = new Controls();
 
         #region GL Draw Functions
         private void Render3D(OpenGL gl) {
-            //Set Background Color
             //gl.ClearColor(0.7f, 0.7f, 0.9f, 0.0f);
 
             gl.Enable(OpenGL.GL_DEPTH_TEST);
@@ -245,7 +225,6 @@ namespace battlepong_game {
         }
 
         public void DrawMovingGridLines(OpenGL gl, Mesh target) {
-
             gl.Viewport(0, 0, (int)Width, (int)Height);
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
@@ -253,8 +232,6 @@ namespace battlepong_game {
             //gl.Translate(0.0f, 0.0f, 0.0f);
 
             gl.LookAt(target.Position.x / 8, 60.0f, 10.0f, target.Position.x / 8, -50.0f, -250.0f, 0, 1, 0);
-
-
 
             //Center Line
             Line.DrawSimpleLine(gl, new Vector3(-550, 0, -200), new Vector3(550, 0, -200));
@@ -274,27 +251,24 @@ namespace battlepong_game {
             }
 
             //Draw Pyramid
-            for (int i = 0; i < 20; i++) {
-                Pyramid.DrawPyramid(gl, new Vector3(-300 + (i * (50 + Pyramid.Scale.z)), 0, -200));
-            }
+           // for (int i = 0; i < 20; i++) {
+            //    Pyramid.DrawPyramid(gl, new Vector3(-300 + (i * (50 + Pyramid.Scale.z)), 0, -200));
+           // }
         }
 
         public void DrawArena(OpenGL gl) {
             gl.LoadIdentity();
-
-            Player1Line.DrawSimpleLine(gl, new Vector3(player1Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player1Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
-            Player2Line.DrawSimpleLine(gl, new Vector3(player2Paddle.Position.x, LowerBoundary.Position.y, commonZ), new Vector3(player2Paddle.Position.x, UpperBoundary.Position.y, commonZ), 5);
-
+            Player1Line.DrawSimpleLine(gl, new Vector3(p1Paddle.Position.x, LowerBoundary.Position.y, 0), new Vector3(p1Paddle.Position.x, UpperBoundary.Position.y, 0), 5);
+            Player2Line.DrawSimpleLine(gl, new Vector3(p2Paddle.Position.x, LowerBoundary.Position.y, 0), new Vector3(p2Paddle.Position.x, UpperBoundary.Position.y, 0), 5);
             UpperBoundary.DrawSquare(gl);
             LowerBoundary.DrawSquare(gl);
-
-            player1Paddle.DrawSquare(gl);
-            player2Paddle.DrawSquare(gl);
+            p1Paddle.DrawSquare(gl);
+            p2Paddle.DrawSquare(gl);
             ball.DrawSquare(gl);
         }
         #endregion
 
-        public bool initialized = false;
+        private bool initialized = false;
 
         public void OpenGLControl_OpenGLDraw(object sender, SharpGL.SceneGraph.OpenGLEventArgs args) {
 
@@ -309,15 +283,14 @@ namespace battlepong_game {
 
             //Initialize Variables of Players
             while (!initialized) {
-                player1Paddle.topLimit = UpperBoundary.Position.y - UpperBoundary.Scale.y;
-                player1Paddle.bottomLimit = LowerBoundary.Position.y + LowerBoundary.Scale.y;
-                player1Paddle.KeyUp = playerOneUp;
-                player1Paddle.KeyDown = playerOneDown;
-                player2Paddle.topLimit = UpperBoundary.Position.y - UpperBoundary.Scale.y;
-                player2Paddle.bottomLimit = LowerBoundary.Position.y + LowerBoundary.Scale.y;
-                player2Paddle.KeyUp = playerTwoUp;
-                player2Paddle.KeyDown = playerTwoDown;
-
+                p1Paddle.topLimit = UpperBoundary.Position.y - UpperBoundary.Scale.y;
+                p1Paddle.bottomLimit = LowerBoundary.Position.y + LowerBoundary.Scale.y;
+                p1Paddle.KeyUp = playerOneUp;
+                p1Paddle.KeyDown = playerOneDown;
+                p2Paddle.topLimit = UpperBoundary.Position.y - UpperBoundary.Scale.y;
+                p2Paddle.bottomLimit = LowerBoundary.Position.y + LowerBoundary.Scale.y;
+                p2Paddle.KeyUp = playerTwoUp;
+                p2Paddle.KeyDown = playerTwoDown;
                 initialized = true;
             }
 
@@ -333,45 +306,30 @@ namespace battlepong_game {
                 //waveOutDevice.Dispose();
             }
 
-
             //Start 
             #region Main
             if (isGameStarted && !isOptionMenuOpen && !isGameOver) {
                 //Ball is not moving
-                if (!isBallPlayed) {
+                if (!ball.isBallPlayed) {
                     ball.Reset();
-                    ball.Position = new Vector3(0, 0, commonZ);
-
-                    if (didPlayer1Scored) {
-                        //1f Player 1 scored then ball is targeted to player2, vice-versa
-                        ball.ApplyForce(new Vector3(1.4f, 1.4f, 0));
-                    }
-                    else {
-                        ball.ApplyForce(new Vector3(-1.4f, 1.4f, 0));
-                    }
-
-                    player1Paddle.Position.y *= 0;
-                    player2Paddle.Position.y *= 0;
-                    isBallPlayed = true;
+                    ball.Position = new Vector3(0, 0, 0);
+                    ball.ApplyForce(new Vector3(1.4f * didPlayer1Scored, 1.4f, 0));                
+       
+                    p1Paddle.Position.y *= 0;
+                    p2Paddle.Position.y *= 0;
+                    ball.isBallPlayed = true;
                     isScoredAlready = false;
                     resetCounter = 30;
                 }
                 else {
-
-                    player1Paddle.Rotation = new Vector4(45, 0, 0, 1);
-                    //Ball is moving
-                    ballTime++;
-                    //Speed up every framesToCount
-                    if (((ballTime % framesToCount) == 0)) {
-                        ball.IncreaseSpeed(0.1f);
-                    }
+                    ball.Play();
+                    ball.SpeedUp(120);
                     angleRandom = (float)Randomizer.Generate(-angleDeviation, angleDeviation);
-                    //Ball Aesthetics                 
-                    ball.AddTrails(gl, isOptionMenuOpen); //Add a trail to the ball                   
-                    ball.AddExplosion(gl, maxVerticalBorder, UpperBoundary, LowerBoundary, isOptionMenuOpen); //A shockwave when ball hit the boundaries
+                    ball.AddTrails(gl, isOptionMenuOpen);                   
+                    ball.AddExplosion(gl, maxVerticalBorder, UpperBoundary, LowerBoundary, isOptionMenuOpen);
 
                     //Scoring
-                    if ((ball.Position.x < player1Paddle.Position.x - scoringLine) && (resetCounter > 0)) {
+                    if ((ball.Position.x < p1Paddle.Position.x - scoringLine) && (resetCounter > 0)) {
                         //Start reset counter
                         isResetOngoing = true;
                         //Score once
@@ -379,23 +337,22 @@ namespace battlepong_game {
                             scoredSound.Play();
                             player2Score++;
                             isScoredAlready = true;
-                            didPlayer1Scored = false;
+                            didPlayer1Scored = -1;
                         }
                     }
 
                     //Reached behind player 2
-                    if ((ball.Position.x > player2Paddle.Position.x + scoringLine) && (resetCounter > 0)) {
+                    if ((ball.Position.x > p2Paddle.Position.x + scoringLine) && (resetCounter > 0)) {
                         isResetOngoing = true;
                         if (!isScoredAlready) {
                             scoredSound.Play();
                             player1Score++;
                             isScoredAlready = true;
-                            didPlayer1Scored = true;
+                            didPlayer1Scored = 1;
                         }
                     }
                 }
             }
-
             //Winning check
             if ((player1Score >= winningScore) || (player2Score >= winningScore)) {
                 isGameOver = true;
@@ -408,7 +365,7 @@ namespace battlepong_game {
                 resetCounter--;
                 if (resetCounter <= 0) {
                     ball.Velocity *= 0;
-                    isBallPlayed = false;
+                    ball.isBallPlayed = false;
                     isResetOngoing = false;
                 }
             }
@@ -423,16 +380,15 @@ namespace battlepong_game {
                     isGameStarted = true;
                 }
                 //Toggle Player''s AI. Only Player 2 starts as AI
-                //If Key is down make it false else true;
-                isPlayer1AI = (Keyboard.IsKeyDown(player1Enable)) ? true : false;
-                isPlayer2AI = (Keyboard.IsKeyDown(player2Enable)) ? false : true;
+                p1Paddle.isAi = (Keyboard.IsKeyDown(player1Enable)) ? true : false;
+                p2Paddle.isAi = (Keyboard.IsKeyDown(player2Enable)) ? false : true;
             }
             else {
                 //Option Menu. Open the Menu, Stop ball from moving, reduce music volume
                 isOptionMenuOpen = Keyboard.IsKeyToggled(pauseKey) ? true : false;
                 ball.enabledUpdate = Keyboard.IsKeyToggled(pauseKey) ? false : true;
-                player1Paddle.enabledUpdate = Keyboard.IsKeyToggled(pauseKey) ? false : true;
-                player2Paddle.enabledUpdate = Keyboard.IsKeyToggled(pauseKey) ? false : true;
+                p1Paddle.enabledUpdate = Keyboard.IsKeyToggled(pauseKey) ? false : true;
+                p2Paddle.enabledUpdate = Keyboard.IsKeyToggled(pauseKey) ? false : true;
                 waveOutDevice.Volume = Keyboard.IsKeyToggled(pauseKey) ? 0.5f : 1.0f;
             }
             //Game Over and Restart
@@ -441,18 +397,16 @@ namespace battlepong_game {
                 player1Score = 0;
                 player2Score = 0;
             }
-
             //Quit Game
             if (Keyboard.IsKeyDown(playerOneQuitKey) || Keyboard.IsKeyDown(playerTwoQuitKey)) {
                 Environment.Exit(0);
             }
-
             //Test Toggle
             isTestToggled = (Keyboard.IsKeyToggled(testKey)) ? true : false;
 
             //Enable Player Paddle Controls if optionmenu is not open and game hasn't started
-            player1Paddle.EnableControl(((!isOptionMenuOpen) && (isGameStarted)), ball, isPlayer1AI);
-            player2Paddle.EnableControl(((!isOptionMenuOpen) && (isGameStarted)), ball, isPlayer2AI);
+            p1Paddle.EnableControl(((!isOptionMenuOpen) && (isGameStarted)), ball, p1Paddle.isAi);
+            p2Paddle.EnableControl(((!isOptionMenuOpen) && (isGameStarted)), ball, p2Paddle.isAi);
 
             #endregion
 
@@ -465,23 +419,23 @@ namespace battlepong_game {
             }
 
             //Ball collision for Player 1
-            if (ball.HasCollidedWith(player1Paddle)) { 
+            if (ball.HasCollidedWith(p1Paddle)) { 
                 if (isSoundEnabled) {
                     paddleHitSound.Play();
                 }
                 //Allowable angle is (0 - 89)
-                ball.ChangeAngle(0 + (10 * (ball.Position.y - player1Paddle.Position.y)) + angleRandom);
-                ball.Color = player1Paddle.Color + lighterColor;
+                ball.ChangeAngle(0 + (10 * (ball.Position.y - p1Paddle.Position.y)) + angleRandom);
+                ball.Color = p1Paddle.Color + lighterColor;
             }
 
             //Ball Collision for Player 2 Paddle
-            if (ball.HasCollidedWith(player2Paddle)) {
+            if (ball.HasCollidedWith(p2Paddle)) {
                 if (isSoundEnabled) {
                     paddleHitSound.Play();
                 }
                 //Allowabled angle is(91 - 269)
-                ball.ChangeAngle(180 - (10 * (ball.Position.y - player2Paddle.Position.y)) + angleRandom);
-                ball.Color = player2Paddle.Color + lighterColor;
+                ball.ChangeAngle(180 - (10 * (ball.Position.y - p2Paddle.Position.y)) + angleRandom);
+                ball.Color = p2Paddle.Color + lighterColor;
             }
             #endregion
 
@@ -490,14 +444,14 @@ namespace battlepong_game {
             gl.DrawText((int)Width / 2 - 65, (int)Height / 2 - 340, 1.0f, 0.3f, 0.3f, "Courier", 60, "" + player1Score);
             gl.DrawText((int)Width / 2, (int)Height / 2 - 340, 0.3f, 0.3f, 1.0f, "Courier", 60, "" + player2Score);
 
-            if (isPlayer1AI) {
+            if (p1Paddle.isAi) {
                 gl.DrawText(50, (int)Height / 2 + 230, 1.0f, 0.3f, 0.3f, "Courier", 20, "AI");
             }
             else {
                 gl.DrawText(50, (int)Height / 2 + 230, 1.0f, 0.3f, 0.3f, "Courier", 20, "Player 1");
             }
 
-            if (isPlayer2AI) {
+            if (p2Paddle.isAi) {
                 gl.DrawText((int)Width - 100, (int)Height / 2 + 230, 0.3f, 0.3f, 1.0f, "Courier", 20, "AI");
             }
             else {
@@ -512,7 +466,7 @@ namespace battlepong_game {
                 gl.DrawText((int)Width / 2 - ((int)(menuSize[0] * cons) * menuText[0].Length), (int)Height / 2 + 60, 0.5f, 1.0f, 0.5f, "Courier New", menuSize[0], menuText[0]);
                 gl.DrawText((int)Width / 2 - ((int)(menuSize[1] * cons) * menuText[1].Length), (int)Height / 2 - 30, 1.0f, 1.0f, 1.0f, "Courier New", menuSize[1], menuText[1]);
                 gl.DrawText((int)Width / 2 - ((int)(menuSize[2] * cons) * menuText[2].Length), (int)Height / 2 - 140, 1.0f, 1.0f, 1.0f, "Courier New", menuSize[2], menuText[2]);
-                if (!isPlayer2AI) {
+                if (!p2Paddle.isAi) {
                     //Player 2 Enabled
                     gl.DrawText((int)Width / 2 - ((int)(menuSize[3] * cons) * menuText[3].Length), (int)Height / 2 - 160, 0.3f, 0.3f, 1.0f, "Courier New", menuSize[3], menuText[3]);
                 }
@@ -542,7 +496,7 @@ namespace battlepong_game {
                     indexSelected = (indexSelected > 1) ? indexSelected - 1 : optionText.GetLength(0);
                 }
 
-                Triangle.Position = new Vector3(-25.0f, 9 - (3.3f * indexSelected), commonZ + 12.0f);
+                Triangle.Position = new Vector3(-25.0f, 9 - (3.3f * indexSelected), 0 + 12.0f);
             }
 
             //Results Menu
@@ -567,7 +521,7 @@ namespace battlepong_game {
                 gl.DrawText(10, 30, 1.0f, 1.0f, 0, "Calibri", 10, "Ball Vector Direction: " + ball.Velocity.x + ", " + ball.Velocity.y);
                 gl.DrawText(10, 20, 1.0f, 0.0f, 0, "Calibri", 10, "Reset in: " + resetCounter);
                 gl.DrawText(10, 10, 1.0f, 0.0f, 0, "Calibri", 10, "Speed: " + ball.Velocity.GetLength());
-                gl.DrawText(10, 60, 1.0f, 1.0f, 0, "Calibri", 10, "Paddle 1 Pos: " + player1Paddle.Position);
+                gl.DrawText(10, 60, 1.0f, 1.0f, 0, "Calibri", 10, "Paddle 1 Pos: " + p1Paddle.Position);
             }
             #endregion
         }

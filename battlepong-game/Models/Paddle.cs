@@ -8,6 +8,7 @@ using System.Windows.Input;
 namespace battlepong_game.Models {
     class Paddle : Mesh {
         //23.5
+        public bool isAi = false;
         public float topLimit;
         public float bottomLimit;
         public float maxSpeed;

@@ -9,19 +9,30 @@ namespace battlepong_game.Models {
     public partial class Ball : Mesh {
 
         public bool isBallPlayed = false;
-
         public Vector4 defaultColor;
 
-        public List<Mesh> ballExplosions = new List<Mesh>();
-        public List<Mesh> ballTrails = new List<Mesh>();
+        private List<Mesh> ballExplosions = new List<Mesh>();
+        private List<Mesh> ballTrails = new List<Mesh>();
+        private float ballTime = 0;
 
         public Ball() {
             MaxVelocity = 30.0f;
             defaultColor = new Vector4(1.0f, 1.0f, 1.0f);
         }
 
+        public void Play() {
+            ballTime++;
+        }
+
+        public void SpeedUp(float when) {
+            if (((ballTime % when) == 0)) {
+                this.IncreaseSpeed(0.1f);
+            }
+        }
+
         public void Reset() {
             Color = defaultColor;
+            ballTime = 0;
         }
 
         public void AddTrails(OpenGL gl, bool isOptionMenuOpen) {
